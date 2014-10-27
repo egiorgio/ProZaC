@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python
 """
 Proxy for integration of resources between OpenStack's Ceilometer and Zabbix
@@ -66,22 +65,34 @@ def init_zcp(threads):
 
     # Creation of the Nova Handler class
     # Responsible for detecting the creation of new instances in OpenStack, translated then to Hosts in Zabbix
-    nova_hdl = nova_handler.NovaEvents(conf_file.read_option('os_rabbitmq', 'rabbit_host'),
-                                            conf_file.read_option('os_rabbitmq', 'rabbit_user'),
-                                            conf_file.read_option('os_rabbitmq', 'rabbit_pass'), zabbix_hdl,
-                                            ceilometer_hdl)
+    # nova_hdl = nova_handler.NovaEvents(conf_file.read_option('os_rabbitmq', 'rabbit_host'),
+    #                                         conf_file.read_option('os_rabbitmq', 'rabbit_user'),
+    #                                         conf_file.read_option('os_rabbitmq', 'rabbit_pass'), zabbix_hdl,
+    #                                         ceilometer_hdl)
+    nova_hdl = nova_handler.NovaEvents(conf_file.read_option('rpc_settings','rpc_nova_type'),
+                                       conf_file.read_option('rpc_settings','rpc_nova_host'),
+                                       conf_file.read_option('rpc_settings','rpc_nova_user'),
+                                       conf_file.read_option('rpc_settings','rpc_nova_pass'),
+                                       zabbix_hdl, ceilometer_hdl
+                                       )
 
     # Creation of the Project Handler class
     # Responsible for detecting the creation of new tenants in OpenStack, translated then to HostGroups in Zabbix
-    project_hdl = project_handler.ProjectEvents(conf_file.read_option('os_rabbitmq', 'rabbit_host'),
-                                                  conf_file.read_option('os_rabbitmq', 'rabbit_user'),
-                                                  conf_file.read_option('os_rabbitmq', 'rabbit_pass'), zabbix_hdl)
+    # project_hdl = project_handler.ProjectEvents(conf_file.read_option('os_rabbitmq', 'rabbit_host'),
+    #                                               conf_file.read_option('os_rabbitmq', 'rabbit_user'),
+    #                                               conf_file.read_option('os_rabbitmq', 'rabbit_pass'), zabbix_hdl)
+    project_hdl= project_handler.ProjectEvents(conf_file.read_option('rpc_settings','rpc_keystone_type'),
+                                               conf_file.read_option('rpc_settings','rpc_keystone_host'),
+                                               conf_file.read_option('rpc_settings','rpc_keystone_user'),
+                                               conf_file.read_option('rpc_settings','rpc_keystone_pass'),
+                                               zabbix_hdl
+        )
 
     #Create and append threads to threads list
-    th1 = threading.Thread(target=project_hdl.keystone_amq)
+    th1 = threading.Thread(target=project_hdl.keystone_listener)
     threads.append(th1)
 
-    th2 = threading.Thread(target=nova_hdl.nova_amq)
+    th2 = threading.Thread(target=nova_hdl.nova_listener)
     threads.append(th2)
 
     th3 = threading.Thread(target=ceilometer_hdl.run())
