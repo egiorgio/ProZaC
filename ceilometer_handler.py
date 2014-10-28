@@ -16,6 +16,7 @@ import struct
 import urllib2
 import json
 import socket
+import time
 from threading import Timer
 
 class CeilometerHandler:
@@ -34,7 +35,10 @@ class CeilometerHandler:
         self.zabbix_port = zabbix_port
         self.zabbix_proxy_name = zabbix_proxy_name
         self.keystone_auth = keystone_auth
-        self.token = self.keystone_auth.getToken()
+        #self.token = self.keystone_auth.getToken()
+        full_token= self.keystone_auth.getTokenV2()
+        self.token = full_token['id']
+        self.token_expires = full_token['expires']
 
     def run(self):
         Timer(self.polling_interval, self.run, ()).start()
@@ -67,6 +71,9 @@ class CeilometerHandler:
         TODO
         :param hosts_id:
         """
+
+        self.check_token_lifetime(self.token_expires,3550)
+
         for host in hosts_id:
             links = []
             if not host[1] == self.template_name:
@@ -112,6 +119,9 @@ class CeilometerHandler:
         :param item_key:
         :param link:
         """
+
+        self.check_token_lifetime(self.token_expires,3550)
+
         try:
             global contents
             contents = urllib2.urlopen(urllib2.Request(link + str("&limit=1"),
@@ -195,3 +205,21 @@ class CeilometerHandler:
 
         payload = self.set_proxy_header(data)
         self.connect_zabbix(payload)
+
+
+    def check_token_lifetime(self,expires_timestamp,threshold=300):
+        """ 
+        check time (in seconds) left before token expiration
+        if time left is below threshold, provides token renewal
+        """
+
+        now_timestamp_utc=time.time()+time.timezone
+        timeleft=expires_timestamp - now_timestamp_utc
+
+        if timeleft < threshold: # default, less than five minutes
+            full_token=self.keystone_auth.getTokenV2()
+            self.token=full_token['id']
+            self.token_expires=full_token['expires']
+            print "token has been renewed"
+            print time.gmtime(self.token_expires)
+    
