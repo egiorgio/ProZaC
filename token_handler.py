@@ -16,6 +16,7 @@ __version__ = "1.0"
 import urllib2
 import json
 import time
+import logging
 
 class Auth:
     def __init__(self, auth_host, public_port, admin_tenant, admin_user, admin_password):
@@ -25,6 +26,8 @@ class Auth:
         self.admin_tenant = admin_tenant
         self.admin_user = admin_user
         self.admin_password = admin_password
+        self.logger=logging.getLogger('ZCP')
+        self.logger.debug("Keystone handler initialized")
 
     def getToken(self):
         """

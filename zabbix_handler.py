@@ -34,6 +34,10 @@ class ZabbixHandler:
         full_token= keystone_auth.getTokenV2()
         self.token = full_token['id']
         self.token_expires = full_token['expires']
+        
+        self.logger=keystone_auth.logger
+        self.logger.debug("Zabbix handler initialized")
+
 
     def first_run(self):
 
@@ -45,6 +49,8 @@ class ZabbixHandler:
         self.group_list = self.host_group_list(tenants)
         self.check_host_groups()
         self.check_instances()
+
+        self.logger.debug("Zabbix first run performed")
 
     def get_zabbix_auth(self):
         """
@@ -440,9 +446,10 @@ class ZabbixHandler:
         """
         tenants = None
 
-        self.check_token_lifetime(self.token_expires,300)
+        self.check_token_lifetime(self.token_expires)
 
-        auth_request = urllib2.Request('http://' + self.keystone_host + ':'+self.keystone_admin_port+'/v2.0/tenants')
+        url='http://' + self.keystone_host + ':'+self.keystone_admin_port+'/v2.0/tenants'
+        auth_request = urllib2.Request(url)
         auth_request.add_header('Content-Type', 'application/json;charset=utf8')
         auth_request.add_header('Accept', 'application/json')
         auth_request.add_header('X-Auth-Token', self.token)
@@ -452,14 +459,13 @@ class ZabbixHandler:
             tenants = json.loads(auth_response.read())
         except urllib2.HTTPError, e:
             if e.code == 401:
-                print '401'
-                print 'Check your keystone credentials\nToken refused!'
+                self.logger.error ('%s : Check your keystone credentials, given token has been refused.' %(url))
             elif e.code == 404:
-                print 'not found'
+                self.logger.error('%s not found' %(url))
             elif e.code == 503:
-                print 'service unavailable'
+                self.logger.error ('%s service unavailable' %(url))
             else:
-                print 'unknown error: '
+                self.logger.error ('unknown error contacting %s' %(url))
         return tenants
 
     def get_tenant_name(self, tenants, tenant_id):
@@ -559,5 +565,5 @@ class ZabbixHandler:
             full_token=self.keystone_auth.getTokenV2()
             self.token=full_token['id']
             self.token_expires=full_token['expires']
-            print "token has been renewed"
-            print time.gmtime(self.token_expires)
+            self.logger.debug("Zabbix handler token has been renewed")
+            

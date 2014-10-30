@@ -15,7 +15,6 @@ __version__ = "1.0"
 import json
 import pika
 
-
 class ProjectEvents:
 
     def __init__(self, rpc_type, rpc_host, rpc_user, rpc_pass, zabbix_handler):
@@ -26,11 +25,13 @@ class ProjectEvents:
         self.rpc_pass = rpc_pass
         self.zabbix_handler = zabbix_handler
 
-        print 'Project Listener started'
+        self.logger=zabbix_handler.logger
+        self.logger.info('Projects listener started')
 
     def keystone_listener(self):
 
-        print "Starting keystone/%s listener (host %s)" %(self.rpc_type,self.rpc_host)
+        self.logger.info("Contacting keystone rpc on host %s (rpc type %s) " %(self.rpc_host,self.rpc_type))
+
         if self.rpc_type == 'rabbitmq':
             self.keystone_amq_rabbitmq()
         elif self.rpc_type == 'qpid':
@@ -71,14 +72,17 @@ class ProjectEvents:
             tenant_id = payload['payload']['resource_info']
             tenants = self.zabbix_handler.get_tenants()
             tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
-	    print "New project (%s) created -> Host group created" %(tenant_name)
+	    self.logger.info("New project (%s) created -> corresponding host group created on zabbix" %(tenant_name))
             self.zabbix_handler.group_list.append([tenant_name, tenant_id])
 
             self.zabbix_handler.create_host_group(tenant_name)
 
         elif payload['event_type'] == 'identity.project.deleted':
-            print "Project deleted - Host group deleted"
+            
             tenant_id = payload['payload']['resource_info']
+            tenants = self.zabbix_handler.get_tenants()
+            tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
+            self.logger.info("Project %s deleted -> Corresponding host group deleted from zabbix" %(tenant_name))
             self.zabbix_handler.project_delete(tenant_id)
 
 

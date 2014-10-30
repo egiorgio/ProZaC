@@ -30,9 +30,13 @@ class NovaEvents:
         self.rpc_pass = rpc_pass
         self.zabbix_handler = zabbix_handler
         self.ceilometer_handler = ceilometer_handler
-        print 'Nova listener started'
+
+        self.logger=zabbix_handler.logger
+        self.logger.info( 'Nova listener started')
 
     def nova_listener(self):
+
+        self.logger.info("Contacting nova rpc on host %s (rpc type %s) " %(self.rpc_host,self.rpc_type))
 
         if self.rpc_type == 'rabbitmq':
             self.nova_amq_rabbitmq()
@@ -78,15 +82,16 @@ class NovaEvents:
                 instance_id = payload['payload']['instance_id']
                 instance_name = payload['payload']['hostname']
                 self.zabbix_handler.create_host(instance_name, instance_id, tenant_name)
-                print "Creating a host in Zabbix Server"
+                self.logger.info("Instance creation detected : creating host %s (tenant %s) on zabbix server" %(instance_name,tenant_name))
                 self.ceilometer_handler.host_list = self.ceilometer_handler.get_hosts_ID()
 
             elif type_of_message == 'compute.instance.delete.end':
                 host = payload['payload']['instance_id']
+                instance_name = payload['payload']['hostname']
                 try:
                     host_id = self.zabbix_handler.find_host_id(host)
                     self.zabbix_handler.delete_host(host_id)
-                    print "Deleting host from Zabbix Server"
+                    self.logger.info("Instance removal detected : deleting host %s from zabbix server" %(instance_name))
                     self.ceilometer_handler.host_list = self.ceilometer_handler.get_hosts_ID()
 
                 except:
@@ -105,7 +110,7 @@ class NovaEvents:
         connection.open()
         session = connection.session()
         receiver = session.receiver('nova/notifications.#')
-        print "starting loop"
+        self.logger.debug ("Starting nova loop")
         self.nova_qpid_loop (receiver)
         
 
@@ -113,10 +118,9 @@ class NovaEvents:
 
         while True:
 
-            print "in the loop"
             message = recv.fetch()
             event_type=message.content['event_type'] 
-            print "Event %s "%(event_type)
+            self.logger.debug("Caught event %s" %(event_type))
 
             if event_type == "compute.instance.create.end":
                 payload=message.content['payload']
@@ -125,15 +129,17 @@ class NovaEvents:
                 instance_name=payload['hostname']
                 self.zabbix_handler.create_host(instance_name,
                                                 instance_id, tenant_name) 
-                print "Creating a host in Zabbix Server" 
+                self.logger.info("Instance creation detected : creating host %s (id %s) (tenant %s) on zabbix server" 
+                                 %(instance_name,instance_id,tenant_name))
                 self.ceilometer_handler.host_list = self.ceilometer_handler.get_hosts_ID()
 
             elif event_type == "compute.instance.delete.end":
                 payload=message.content['payload']
                 instance_id=payload['instance_id'] 
+                instance_name = payload['hostname']
                 host_id = self.zabbix_handler.find_host_id(instance_id)
                 self.zabbix_handler.delete_host(host_id) 
-                print "Deleting host from Zabbix Server" 
+                self.logger.info("Instance removal detected : deleting host %s (%s) from zabbix server" %(instance_name,instance_id))
                 self.ceilometer_handler.host_list= self.ceilometer_handler.get_hosts_ID() 
 
             else: pass  

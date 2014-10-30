@@ -40,6 +40,9 @@ class CeilometerHandler:
         self.token = full_token['id']
         self.token_expires = full_token['expires']
 
+        self.logger=keystone_auth.logger
+        self.logger.debug("Ceilometer handler initialized")
+
     def run(self):
         Timer(self.polling_interval, self.run, ()).start()
         host_list = self.get_hosts_ID()
@@ -72,13 +75,13 @@ class CeilometerHandler:
         :param hosts_id:
         """
 
-        self.check_token_lifetime(self.token_expires,3550)
+        self.check_token_lifetime(self.token_expires)
 
         for host in hosts_id:
             links = []
             if not host[1] == self.template_name:
 
-                print "Checking host:" + host[3]
+                self.logger.debug("Checking host %s" %(host[3]))
                 #Get links for instance compute metrics
                 request = urllib2.urlopen(urllib2.Request(
                     "http://" + self.ceilometer_api_host + ":" + self.ceilometer_api_port +
@@ -110,7 +113,7 @@ class CeilometerHandler:
                 # Query ceilometer API using the array of links
                 for line in links:
                     self.query_ceilometer(host[1], line['rel'], line['href'])
-                    print "  - Item " + line['rel']
+                    self.logger.debug ("  - Item %s" %(line['rel']))
 
     def query_ceilometer(self, resource_id, item_key, link):
         """
@@ -120,7 +123,7 @@ class CeilometerHandler:
         :param link:
         """
 
-        self.check_token_lifetime(self.token_expires,3550)
+        self.check_token_lifetime(self.token_expires)
 
         try:
             global contents
@@ -131,14 +134,13 @@ class CeilometerHandler:
 
         except urllib2.HTTPError, e:
             if e.code == 401:
-                print "401"
-                print "Error... \nToken refused! Please check your credentials"
+                self.logger.error("Error 401...Token refused! Please check your credentials")
             elif e.code == 404:
-                print 'not found'
+                self.logger.error("%s not found" %(link))
             elif e.code == 503:
-                print 'service unavailable'
+                self.logger.error("service %s unavailable" %(link))
             else:
-                print 'unknown error: '
+                self.logger.error("unknown error opening %s " %(link))
 
         response = json.loads(contents)
 
@@ -220,6 +222,5 @@ class CeilometerHandler:
             full_token=self.keystone_auth.getTokenV2()
             self.token=full_token['id']
             self.token_expires=full_token['expires']
-            print "token has been renewed"
-            print time.gmtime(self.token_expires)
+            self.logger.info("ceilometer token has been renewed")
     

@@ -21,6 +21,9 @@ import readFile
 import token_handler
 import zabbix_handler
 import ceilometer_handler
+import logging
+from logging.handlers import RotatingFileHandler
+
 
 
 def init_zcp(threads):
@@ -29,6 +32,21 @@ def init_zcp(threads):
     """
 
     conf_file = readFile.ReadConfFile()
+
+    zcp_logger=logging.getLogger('ZCP')
+
+    zcp_logHandler = RotatingFileHandler(conf_file.read_option('zcp_configs','log_file'),
+                                     mode='a',maxBytes=99999,
+                                     backupCount=7)
+
+    zcp_logHandler.setFormatter(logging.Formatter('%(asctime)-4s %(levelname)-4s %(message)s'))
+    zcp_logger.addHandler(zcp_logHandler)
+
+    zcp_logger.setLevel(logging.DEBUG)
+    zcp_logger.info("***********************************************************************")
+    zcp_logger.info("ZCP starting")
+    zcp_logger.debug("Ready to load configuration options from %s" %(conf_file.conf_file_name))
+
 
     # Creation of the Auth keystone-dedicated authentication class
     # Responsible for managing AAA related requests
@@ -60,6 +78,7 @@ def init_zcp(threads):
                                                           conf_file.read_option('zcp_configs', 'zabbix_proxy_name'),
                                                           keystone_auth)
 
+    zcp_logger.debug("Listeners have been initialized, ready for Zabbix first run")
     #First run of the Zabbix handler for retrieving the necessary information
     zabbix_hdl.first_run()
 
@@ -111,3 +130,4 @@ if __name__ == '__main__':
     [th.join() for th in threads]
 
     print "ZCP terminated"
+    
