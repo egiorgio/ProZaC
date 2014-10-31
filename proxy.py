@@ -24,12 +24,14 @@ import ceilometer_handler
 import logging
 from logging.handlers import RotatingFileHandler
 
-
-
 def init_zcp(threads):
     """
         Method used to initialize the Zabbix-Ceilometer Proxy
     """
+
+    log_levels={"DEBUG":logging.DEBUG,"INFO":logging.INFO,
+                "WARNING":logging.WARNING,"ERROR":logging.ERROR,
+                "CRITICAL":logging.CRITICAL}
 
     conf_file = readFile.ReadConfFile()
 
@@ -42,10 +44,10 @@ def init_zcp(threads):
     zcp_logHandler.setFormatter(logging.Formatter('%(asctime)-4s %(levelname)-4s %(message)s'))
     zcp_logger.addHandler(zcp_logHandler)
 
-    zcp_logger.setLevel(logging.DEBUG)
+    zcp_logger.setLevel(log_levels[conf_file.read_option('zcp_configs','log_level')])
     zcp_logger.info("***********************************************************************")
     zcp_logger.info("ZCP starting")
-    zcp_logger.debug("Ready to load configuration options from %s" %(conf_file.conf_file_name))
+    zcp_logger.info("Loading configuration options from %s" %(conf_file.conf_file_name))
 
 
     # Creation of the Auth keystone-dedicated authentication class
@@ -78,7 +80,7 @@ def init_zcp(threads):
                                                           conf_file.read_option('zcp_configs', 'zabbix_proxy_name'),
                                                           keystone_auth)
 
-    zcp_logger.debug("Listeners have been initialized, ready for Zabbix first run")
+    zcp_logger.info("Listeners have been initialized, ready for Zabbix first run")
     #First run of the Zabbix handler for retrieving the necessary information
     zabbix_hdl.first_run()
 
@@ -129,5 +131,7 @@ if __name__ == '__main__':
     #wait for all threads to complete
     [th.join() for th in threads]
 
-    print "ZCP terminated"
+    # this will never be printed, as daemon is 
+    # killed by shell
+    zcp_logger.info("ZCP terminated")
     

@@ -27,7 +27,7 @@ class Auth:
         self.admin_user = admin_user
         self.admin_password = admin_password
         self.logger=logging.getLogger('ZCP')
-        self.logger.debug("Keystone handler initialized")
+        self.logger.info("Keystone handler initialized")
 
     def getToken(self):
         """

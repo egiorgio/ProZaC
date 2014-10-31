@@ -41,7 +41,7 @@ class CeilometerHandler:
         self.token_expires = full_token['expires']
 
         self.logger=keystone_auth.logger
-        self.logger.debug("Ceilometer handler initialized")
+        self.logger.info("Ceilometer handler initialized")
 
     def run(self):
         Timer(self.polling_interval, self.run, ()).start()
@@ -81,7 +81,7 @@ class CeilometerHandler:
             links = []
             if not host[1] == self.template_name:
 
-                self.logger.debug("Checking host %s" %(host[3]))
+                self.logger.info("Checking host %s" %(host[3]))
                 #Get links for instance compute metrics
                 request = urllib2.urlopen(urllib2.Request(
                     "http://" + self.ceilometer_api_host + ":" + self.ceilometer_api_port +

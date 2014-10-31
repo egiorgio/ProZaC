@@ -36,7 +36,7 @@ class ZabbixHandler:
         self.token_expires = full_token['expires']
         
         self.logger=keystone_auth.logger
-        self.logger.debug("Zabbix handler initialized")
+        self.logger.info("Zabbix handler initialized")
 
 
     def first_run(self):
@@ -50,7 +50,7 @@ class ZabbixHandler:
         self.check_host_groups()
         self.check_instances()
 
-        self.logger.debug("Zabbix first run performed")
+        self.logger.info("Zabbix first run performed")
 
     def get_zabbix_auth(self):
         """
@@ -118,6 +118,7 @@ class ZabbixHandler:
         :param value_type:
         :return: returns the json message to send to zabbix API
         """
+
         payload = {"jsonrpc": "2.0",
                    "method": "item.create",
                    "params": {
@@ -218,7 +219,7 @@ class ZabbixHandler:
             if tenant_name == 'admin':
                 tenant_id = item[1]
 
-        self.check_token_lifetime(self.token_expires,300)
+        self.check_token_lifetime(self.token_expires)
 
         auth_request = urllib2.Request(
             "http://" + self.keystone_host + ":" + self.compute_port + "/v2/" + tenant_id +
@@ -565,5 +566,5 @@ class ZabbixHandler:
             full_token=self.keystone_auth.getTokenV2()
             self.token=full_token['id']
             self.token_expires=full_token['expires']
-            self.logger.debug("Zabbix handler token has been renewed")
+            self.logger.info("Zabbix handler token has been renewed")
             
