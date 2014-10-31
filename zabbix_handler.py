@@ -91,7 +91,7 @@ class ZabbixHandler:
         self.create_items(template_id)
         return template_id
 
-    def create_items(self, template_id):
+    def create_items_legacy(self, template_id):
         """
         Method used to create the items for measurements regarding the template
         :param template_id: receives the template id
@@ -109,7 +109,83 @@ class ZabbixHandler:
             payload = self.define_item(template_id, item, value_type)
             self.contact_zabbix_server(payload)
 
-    def define_item(self, template_id, item, value_type):
+    def create_items(self, template_id):
+        """
+        Method used to create the items for measurements regarding the template
+        :param template_id: receives the template id
+        """
+        items_list = ['cpu', 'cpu_util', 'disk.read.bytes', 'disk.write.bytes',
+                      'disk.write.requests',
+                      'disk.read.requests', 'network.incoming.bytes', 'network.incoming.packets',
+                      'network.outgoing.bytes',
+                      'network.outgoing.packets']
+
+        ####  defaults
+        value_type=0
+        delta=0
+        units=""
+        multiplier="1"
+        #########
+
+        for item in items_list:
+            if item == 'cpu':
+                value_type = 3
+                units='ns'
+                delta=2
+
+            if item == "cpu_util":
+                units="%"
+
+            if item.startswith('network.'):
+                delta=1 #speed
+                if item.endswith('bytes'):
+                    value_type=3 #numeric unsigned
+                    units='Kbps'
+                    multiplier=1024
+
+            if item.startswith('disk.'):
+                delta=2
+                if item.endswith('bytes'):
+                    units='MB'
+                    multiplier=1048576
+            
+        
+            payload = self.define_item(template_id, item, value_type,delta,units,multiplier)
+            self.contact_zabbix_server(payload)
+ 
+
+    def define_item(self, template_id, item, value_type,delta,units,multiplier):
+        """
+        Method used to define the items parameters
+
+        :param template_id:
+        :param item:
+        :param value_type:
+        :return: returns the json message to send to zabbix API
+        """
+
+        payload = {"jsonrpc": "2.0",
+                   "method": "item.create",
+                   "params": {
+                       "name": item,
+                       "key_": item,
+                       "hostid": template_id,
+                       "type": 2,
+                       "value_type": value_type,
+                       "history": "90",
+                       "trends": "365",
+                       "units": units,
+                       "delta": delta,
+                       "formula": multiplier,
+                       "lifetime": "30",
+                       "delay": 10
+                   },
+                   "auth": self.api_auth,
+                   "id": 1}
+
+        return payload
+
+    def define_item_legacy(self, template_id, item, value_type):
         """
         Method used to define the items parameters
 
