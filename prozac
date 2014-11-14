@@ -1,6 +1,6 @@
 #!/bin/sh
 #
-# Zabbix-Ceilometer-proxy 
+# ProZaC : Proxy Zabbix Ceilometer 
 #
 # chkconfig:   - 98 02
 # description: 
