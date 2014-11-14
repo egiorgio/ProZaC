@@ -121,40 +121,62 @@ class ZabbixHandler:
                       'network.outgoing.packets']
 
         ####  defaults
-        value_type=0
-        delta=0
-        units=""
-        multiplier="1"
+        #value_type = 0
+        #delta = 0
+        #units = ""
         #########
+        
+
+        # can be improved
 
         for item in items_list:
+
             if item == 'cpu':
                 value_type = 3
                 units='ns'
                 delta=2
+                formula_factor = "1" 
 
-            if item == "cpu_util":
-                units="%"
+            if item == 'cpu_util':
+                value_type = 0
+                units = '%'
+                delta=0 
+                formula_factor = "1" #it changes only for network traffic rates
 
             if item.startswith('network.'):
-                delta=1 #speed
+                value_type=0
+                units = ''
+                delta=0 #speed
+                formula_factor = "1" #it changes only for network traffic rates
+                
                 if item.endswith('bytes'):
                     value_type=3 #numeric unsigned
-                    units='Kbps'
-                    multiplier=1024
+                    units='bps'
+                    delta = 1
+                    formula_factor="8"
 
             if item.startswith('disk.'):
-                delta=2
+                value_type=0
+                units = ''
+                delta=0
+                formula_factor = "1" #it changes only for network traffic rates
+                
                 if item.endswith('bytes'):
-                    units='MB'
-                    multiplier=1048576
+                    units='B'
+                    delta=2
+                    #multiplier="1048576"
             
         
-            payload = self.define_item(template_id, item, value_type,delta,units,multiplier)
-            self.contact_zabbix_server(payload)
+            payload = self.define_item(template_id, item, value_type,delta,units,formula_factor)
+            response=self.contact_zabbix_server(payload)
+            
+            if "error" in response:
+                self.logger.error("%s : %s %s" %(response['error']['code'],response['error']['message'],response['error']['data']))
+            else:
+                self.logger.debug("Item defined correctly with id %s" %(response['result']['itemids']))
  
 
-    def define_item(self, template_id, item, value_type,delta,units,multiplier):
+    def define_item(self, template_id, item, value_type,delta,units,factor):
         """
         Method used to define the items parameters
 
@@ -176,12 +198,15 @@ class ZabbixHandler:
                        "trends": "365",
                        "units": units,
                        "delta": delta,
-                       "formula": multiplier,
+                       "multiplier": 1,
+                       "formula": factor,
                        "lifetime": "30",
                        "delay": 10
                    },
                    "auth": self.api_auth,
                    "id": 1}
+        
+        self.logger.debug("Creating item %s" %(item)) 
 
         return payload
 
