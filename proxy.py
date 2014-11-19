@@ -5,14 +5,24 @@ Proxy for integration of resources between OpenStack's Ceilometer and Zabbix
 This proxy periodically checks for changes in Ceilometer's resources reporting them to Zabbix. It is also integrated
 OpenStack's Nova and RabbitMQ for reflecting changes in Projects/Tenants and Instances
 """
+#############       NOTICE         ######################
+# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP), 
+# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt). 
+# For further information about ZCP, check its github : 
+# https://github.com/clmarques/ZabbixCeilometer-Proxy  
+##########################################################
+### ProZaC added functionalities (in this module) ######## 
+#
+# - support to file logging through python logging library
+# - support to distinct AMQP servers for nova and keystone
+# 
+### --------------------------- ##########################
 
-__authors__ = "Claudio Marques, David Palma, Luis Cordeiro"
-__copyright__ = "Copyright (c) 2014 OneSource Consultoria Informatica, Lda"
+__copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
 __license__ = "Apache 2"
-__contact__ = "www.onesource.pt"
-__date__ = "01/09/2014"
-
-__version__ = "1.0"
+__contact__ = "emidio.giorgio@ct.infn.it"
+__date__ = "15/11/2014"
+__version__ = "0.9"
 
 import threading
 import project_handler
@@ -26,7 +36,7 @@ from logging.handlers import RotatingFileHandler
 
 def init_zcp(threads):
     """
-        Method used to initialize the Zabbix-Ceilometer Proxy
+        Method used to initialize the Proxy Zabbix - Ceilometer
     """
 
     log_levels={"DEBUG":logging.DEBUG,"INFO":logging.INFO,
@@ -46,7 +56,7 @@ def init_zcp(threads):
 
     zcp_logger.setLevel(log_levels[conf_file.read_option('zcp_configs','log_level')])
     zcp_logger.info("***********************************************************************")
-    zcp_logger.info("ZCP starting")
+    zcp_logger.info("Prozac is starting")
     zcp_logger.info("Loading configuration options from %s" %(conf_file.conf_file_name))
 
 
@@ -133,5 +143,5 @@ if __name__ == '__main__':
 
     # this will never be printed, as daemon is 
     # killed by shell
-    zcp_logger.info("ZCP terminated")
+    zcp_logger.info("Prozac terminated")
     

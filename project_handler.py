@@ -4,13 +4,25 @@ Class for Handling KeystoneEvents in OpenStack's RabbitMQ
 Uses the pika library for handling the AMQP protocol, implementing the necessary callbacks for Keystone events
 """
 
-__authors__ = "Claudio Marques, David Palma, Luis Cordeiro"
-__copyright__ = "Copyright (c) 2014 OneSource Consultoria Informatica, Lda"
-__license__ = "Apache 2"
-__contact__ = "www.onesource.pt"
-__date__ = "01/09/2014"
+#############       NOTICE         ######################
+# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP), 
+# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt). 
+# For further information about ZCP, check its github : 
+# https://github.com/clmarques/ZabbixCeilometer-Proxy  
+##########################################################
+### ProZaC added functionalities (in this module) ######## 
+#
+# - support to logging 
+# - support for an AMQP server distinct from nova 
+# - support to QPID
+### --------------------------- ##########################
 
-__version__ = "1.0"
+__copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
+__license__ = "Apache 2"
+__contact__ = "emidio.giorgio@ct.infn.it"
+__date__ = "15/11/2014"
+__version__ = "0.9"
+
 
 import json
 import pika

@@ -5,6 +5,7 @@
 This project started as a way to integrate monitoring information collected in a Cloud environment, namely by OpenStack's Ceilometer, integrating it with an already existing monitoring solution using Zabbix.
 
 ##Features
+
 * Integration of OpenStack's available monitoring information (e.g. using Ceilometer) with already existing Monitoring systems (e.g. Zabbix);
 * Automatically gather information about the existing Cloud Infrastructure being considered (tenants, instances);
 * Seamlessly handle changes in the Cloud Infrastructure (creation and deletion of tenants and/or instances);
@@ -40,19 +41,30 @@ Assuming that all the above requirements are met, ProZaC can be run  with 3 simp
 
 3. Finally, run the Zabbix-Ceilometer Proxy!
 
-		service prozac.py start
+		service prozac start
 
 If all goes well the information retrieved from OpenStack's Ceilometer will be pushed in your Zabbix monitoring system.
 
 ##Source
+
 If not doing so already, you can check out the latest version of Prozac through [github](https://github.com/INFN-Catania/ProZaC).
 
 ##Copyright
 
+(C) Istituto Nazionale di Fisica Nucleare. For more info, emidio.giorgio@ct.infn.it
+
 ##Credits
 
-ProZaC is a fork of *ZabbixCeilometer-Proxy* of OneSource Consultoria Informatica, Lda. [🔗](http://www.onesource.pt). For further information about the original project, check its [github](https://github.com/clmarques/ZabbixCeilometer-Proxy). 
-See ProZaC individual source files for more details about functionalities added after the fork.
+ProZaC is a fork of *ZabbixCeilometer-Proxy* (aka ZCP), which is Copyright of OneSource Consultoria Informatica, Lda. [🔗](http://www.onesource.pt). For further information about ZCP, check its [github](https://github.com/clmarques/ZabbixCeilometer-Proxy).
+Main features introduced with ProZaC:
+
+* support to distinct AMQP servers between nova and keystone
+* support to QPID AMQP servers 
+* support to file logging through python standard lib
+* support to token renewal : it's no longer needed to restart thr proxy each hour
+* init script
+ 
+See individual source files for more details about functionalities added after the fork.
 
 ##License
 Distributed under the Apache 2 license. See ``LICENSE.txt`` for more information.
