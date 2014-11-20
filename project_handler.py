@@ -1,7 +1,8 @@
 """
-Class for Handling KeystoneEvents in OpenStack's RabbitMQ
+Class for Handling KeystoneEvents in OpenStack's RabbitMQ/QPID
 
-Uses the pika library for handling the AMQP protocol, implementing the necessary callbacks for Keystone events
+Uses either pika or proton libraries for handling the AMQP protocol, depending whether the message broker is RabbitMQ or QPID, and then implements 
+the necessary callbacks for Keystone events, such as tenant creation
 """
 
 #############       NOTICE         ######################
