@@ -24,6 +24,7 @@ __contact__ = "emidio.giorgio@ct.infn.it"
 __date__ = "15/11/2014"
 __version__ = "0.9"
 
+import sys, getopt
 import threading
 import project_handler
 import nova_handler
@@ -34,7 +35,7 @@ import ceilometer_handler
 import logging
 from logging.handlers import RotatingFileHandler
 
-def init_zcp(threads):
+def init_zcp(threads,conf_file):
     """
         Method used to initialize the Proxy Zabbix - Ceilometer
     """
@@ -43,7 +44,7 @@ def init_zcp(threads):
                 "WARNING":logging.WARNING,"ERROR":logging.ERROR,
                 "CRITICAL":logging.CRITICAL}
 
-    conf_file = readFile.ReadConfFile()
+    conf_file = readFile.ReadConfFile(conf_file)
 
     zcp_logger=logging.getLogger('ZCP')
 
@@ -134,9 +135,26 @@ def init_zcp(threads):
 
 
 if __name__ == '__main__':
+
+    configuration_file=""
+
+    try:
+        opts,args=getopt.getopt(sys.argv[1:],"hc:",["--help","conf="])
+    except getopt.GetoptError:
+        print sys.argv[0]+" -c <configuration file>"
+        sys.exit(2)
+
+    for opt,arg in opts:
+        if opt in ("-h","--help"):
+            print sys.argv[0]+" -c <configuration file>"
+            sys.exit(0)
+        elif opt in ("-c","--conf"):
+            configuration_file=arg
+            print "Configuration file is "+configuration_file
+
     threads = []
 
-    init_zcp(threads)
+    init_zcp(threads,configuration_file)
 
     #wait for all threads to complete
     [th.join() for th in threads]
