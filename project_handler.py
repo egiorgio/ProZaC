@@ -48,7 +48,7 @@ class ProjectEvents:
         if self.rpc_type == 'rabbitmq':
             self.keystone_amq_rabbitmq()
         elif self.rpc_type == 'qpid':
-            self.nova_amq_qpid()
+            self.keystone_amq_qpid()
 
     def keystone_amq_rabbitmq(self):
         """
@@ -87,7 +87,6 @@ class ProjectEvents:
             tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
 	    self.logger.info("New project (%s) created -> corresponding host group created on zabbix" %(tenant_name))
             self.zabbix_handler.group_list.append([tenant_name, tenant_id])
-
             self.zabbix_handler.create_host_group(tenant_name)
 
         elif payload['event_type'] == 'identity.project.deleted':
@@ -100,5 +99,39 @@ class ProjectEvents:
 
 
     ## SUPPORT FOR QPID TO BE ADDED 
+    def keystone_amq_qpid(self):
 
+        from qpid.messaging.endpoints import Connection
 
+        connection = Connection(self.rpc_host,username="guest",password="guest")
+        connection.open()
+        session = connection.session()
+        receiver = session.receiver('openstack/notifications.#')
+        self.logger.debug ("Starting keystone loop")
+        self.keystone_qpid_loop (receiver)
+
+    def keystone_qpid_loop(self,recv):
+        
+        while True:
+            message = recv.fetch()
+            event_type=message.content['event_type'] 
+            self.logger.debug("Caught event %s" %(event_type))
+
+            if event_type == "identity.project.created":
+                payload=message.content['payload']
+                tenant_id=payload['resource_info']
+                tenants = self.zabbix_handler.get_tenants()
+                tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
+                self.logger.info("New project (%s) created -> corresponding host group created on zabbix" %(tenant_name))
+                self.zabbix_handler.group_list.append([tenant_name, tenant_id])
+                self.zabbix_handler.create_host_group(tenant_name)
+
+            elif event_type == "identity.project.deleted":
+                payload=message.content['payload']
+                tenant_id=payload['resource_info']
+                tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
+                self.logger.info("Project %s deleted -> Corresponding host group deleted from zabbix" %(tenant_name))
+                self.zabbix_handler.project_delete(tenant_id)
+                 
+
+            else: pass 

@@ -552,6 +552,7 @@ class ZabbixHandler:
         self.contact_zabbix_server(payload)
 
     def get_tenants(self):
+        # might be well renamed or relocated to another module EG
         """
         Method used to get a list of tenants from keystone
 
