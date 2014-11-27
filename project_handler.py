@@ -2,7 +2,7 @@
 Class for Handling KeystoneEvents in OpenStack's RabbitMQ/QPID
 
 Uses either pika or proton libraries for handling the AMQP protocol, depending whether the message broker is RabbitMQ or QPID, and then implements 
-the necessary callbacks for Keystone events, such as tenant creation
+the necessary callbacks for Keystone events (tenant creation)
 """
 
 #############       NOTICE         ######################
@@ -98,7 +98,7 @@ class ProjectEvents:
             self.zabbix_handler.project_delete(tenant_id)
 
 
-    ## SUPPORT FOR QPID  
+    ##  QPID  
     def keystone_amq_qpid(self):
 
         from qpid.messaging.endpoints import Connection
