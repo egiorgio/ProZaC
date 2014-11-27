@@ -98,7 +98,7 @@ class ProjectEvents:
             self.zabbix_handler.project_delete(tenant_id)
 
 
-    ## SUPPORT FOR QPID TO BE ADDED 
+    ## SUPPORT FOR QPID  
     def keystone_amq_qpid(self):
 
         from qpid.messaging.endpoints import Connection
