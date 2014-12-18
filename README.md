@@ -29,6 +29,43 @@ Otherwise, you might check whether pika or qpid are available in the software re
 
 If the previous command fails, download and manually install the Pika library on the host where you intend to run ProZaC:
 
+This can be done installing dependencies as root: 
+
+  apt-get install build-essential cmake uuid-dev python-dev libssl-dev swig \
+     ruby libboost-dev libboost-program-options-dev libboost-system-dev libsasl2-dev \
+     libnspr4-dev libnss3-dev libdb++-dev libaio-dev
+
+and after downloading qpid packages http://qpid.apache.org/download.html Qpid Proton and Qpid C++ Broker. after quite easily 
+configure and compile both packages:
+
+  wget http://apache.fastbull.org/qpid/proton/0.8/qpid-proton-0.8.tar.gz
+  tar -zxvf qpid-proton-0.8.tar.gz 
+  cd qpid-proton-0.8/
+  mkdir build
+  cd build/
+  cmake .. -DCMAKE_INSTALL_PREFIX=/installdir -DSYSINSTALL_PYTHON=ON -DBUILD_PHP=OFF -DBUILD_PERL=OFF \
+    -DBUILD_RUBY=OFF -DBUILD_ JAVA=OFF
+  make all
+
+and after as root: 
+
+  make install
+
+more or less the same for the C++ broker:
+ 
+ wget http://mirrors.muzzy.it/apache/qpid/0.30/qpid-cpp-0.30.tar.gz
+ tar -zxvf qpid-cpp-0.30.tar.gz
+ cd qpid-cpp-0.30
+ mkdir build
+ cd build/
+ cmake .. -DCMAKE_INSTALL_PREFIX=/instaldir -DBUILD_BINDING_PERL=OFF -DSYSCONF_INSTALL_DIR=/etc
+ make all
+
+as root:
+
+ make install
+
+
 **Note:** Since the purpose of this project is to be integrated with OpenStack and Zabbix it is assumed that apart from a running installation of these two, some knowledge of OpenStack has already been acquired.
 
 ##Usage
