@@ -88,7 +88,10 @@ def init_zcp(threads):
                                                           conf_file.read_option('zabbix_configs', 'zabbix_host'),
                                                           conf_file.read_option('zabbix_configs', 'zabbix_port'),
                                                           conf_file.read_option('zcp_configs', 'zabbix_proxy_name'),
-                                                          keystone_auth)
+                                                          keystone_auth,
+                                                          conf_file.read_option('keystone_authtoken', 'keystone_host'),
+                                                          conf_file.read_option('keystone_authtoken', 'nova_compute_listen_port'),
+                                                          conf_file.read_option('keystone_authtoken', 'keystone_admin_port'))
 
     zcp_logger.info("Listeners have been initialized, ready for Zabbix first run")
     #First run of the Zabbix handler for retrieving the necessary information
