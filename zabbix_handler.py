@@ -41,8 +41,7 @@ class ZabbixHandler:
         self.template_name = template_name
         self.zabbix_proxy_name = zabbix_proxy_name
         self.keystone_auth = keystone_auth
-        #self.token = keystone_auth.getToken()
-        full_token= keystone_auth.getTokenV2()
+        full_token= keystone_auth.getToken()
         self.token = full_token['id']
         self.token_expires = full_token['expires']
         
@@ -675,7 +674,7 @@ class ZabbixHandler:
         timeleft=expires_timestamp - now_timestamp_utc
 
         if timeleft < threshold: # default, less than five minutes
-            full_token=self.keystone_auth.getTokenV2()
+            full_token=self.keystone_auth.getToken()
             self.token=full_token['id']
             self.token_expires=full_token['expires']
             self.logger.info("Zabbix handler token has been renewed")

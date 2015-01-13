@@ -52,8 +52,7 @@ class CeilometerHandler:
         self.compute_port = compute_port
         self.keystone_admin_port = keystone_admin_port
         self.admin_tenantid = self.get_admin_tenantid()
-        #self.token = self.keystone_auth.getToken()
-        full_token = self.keystone_auth.getTokenV2()
+        full_token = self.keystone_auth.getToken()
         self.token = full_token['id']
         self.token_expires = full_token['expires']
 
@@ -70,7 +69,7 @@ class CeilometerHandler:
         timeleft = expires_timestamp - now_timestamp_utc
 
         if timeleft < threshold: # default, less than five minutes
-            full_token = self.keystone_auth.getTokenV2()
+            full_token = self.keystone_auth.getToken()
             self.token = full_token['id']
             self.token_expires = full_token['expires']
             self.logger.info("ceilometer token has been renewed")

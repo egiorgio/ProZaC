@@ -42,23 +42,6 @@ class Auth:
     def getToken(self):
         """
         Requests and returns an authentication token to be used with OpenStack's Ceilometer, Nova and RabbitMQ
-        :return: The Keystone token assigned to these credentials
-        """
-        auth_request = urllib2.Request("http://"+self.auth_host+":"+self.public_port+"/v2.0/tokens")
-        auth_request.add_header('Content-Type', 'application/json;charset=utf8')
-        auth_request.add_header('Accept', 'application/json')
-        auth_data = {"auth": {"tenantName": self.admin_tenant,
-                              "passwordCredentials": {"username": self.admin_user, "password": self.admin_password}}}
-        auth_request.add_data(json.dumps(auth_data))
-        auth_response = urllib2.urlopen(auth_request)
-        response_data = json.loads(auth_response.read())
-        token = response_data['access']['token']['id']
-        
-        return token
-
-    def getTokenV2(self):
-        """
-        Requests and returns an authentication token to be used with OpenStack's Ceilometer, Nova and RabbitMQ
         :return: a tuple with 
          - the Keystone token assigned to these credentials a
          - the expiration time (to avoid API REST calls at each Ceilometer or Project thread iteration)
