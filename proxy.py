@@ -70,6 +70,7 @@ def init_zcp(threads):
     # Responsible for the communication with Zabbix
     zabbix_hdl = zabbix_handler.ZabbixHandler(conf_file.read_option('keystone_authtoken', 'keystone_admin_port'),
                                               conf_file.read_option('keystone_authtoken', 'nova_compute_listen_port'),
+                                              conf_file.read_option('keystone_authtoken', 'network_name'),
                                               conf_file.read_option('zabbix_configs', 'zabbix_admin_user'),
                                               conf_file.read_option('zabbix_configs', 'zabbix_admin_pass'),
                                               conf_file.read_option('zabbix_configs', 'zabbix_host'),
