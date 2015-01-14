@@ -64,7 +64,6 @@ class CeilometerHandler:
         check time (in seconds) left before token expiration
         if time left is below threshold, provides token renewal
         """
-
         now_timestamp_utc = time.time() + time.timezone
         timeleft = expires_timestamp - now_timestamp_utc
 
@@ -104,8 +103,7 @@ class CeilometerHandler:
     def get_admin_tenantid(self):
         tenantid = ""
         try:
-          request = urllib2.urlopen(urllib2.Request(
-              "http://" + self.keystone_host + ":" + self.keystone_admin_port + "/v2.0/tenants",
+            request = urllib2.urlopen(urllib2.Request("http://" + self.keystone_host + ":" + self.keystone_admin_port + "/v2.0/tenants",
               headers={"Accept": "application/json", "Content-Type": "application/json",
               "X-Auth-Token": self.token})).read()
         except urllib2.HTTPError, e:
@@ -123,7 +121,6 @@ class CeilometerHandler:
         Method used do query Zabbix API in order to fill an Array of hosts
         :return: returns a array of servers and items to monitor by server
         """
-
         try:
           request = urllib2.urlopen(urllib2.Request(
               "http://" + self.keystone_host + ":" + self.compute_port + "/v2/" + self.admin_tenantid + "/servers/detail?all_tenants=1&status=ACTIVE",
@@ -149,7 +146,6 @@ class CeilometerHandler:
         :param item_key:
         :param link:
         """
-
         self.check_token_lifetime(self.token_expires)
 
         try:
