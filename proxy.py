@@ -39,17 +39,15 @@ def init_zcp(threads):
         Method used to initialize the Proxy Zabbix - Ceilometer
     """
 
-    log_levels={"DEBUG":logging.DEBUG,"INFO":logging.INFO,
-                "WARNING":logging.WARNING,"ERROR":logging.ERROR,
-                "CRITICAL":logging.CRITICAL}
+    log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING,
+									"ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
 
     conf_file = readFile.ReadConfFile()
 
-    zcp_logger=logging.getLogger('ZCP')
+    zcp_logger = logging.getLogger('ZCP')
 
     zcp_logHandler = RotatingFileHandler(conf_file.read_option('zcp_configs','log_file'),
-                                     mode='a',maxBytes=99999,
-                                     backupCount=7)
+																				 mode = 'a', maxBytes = 99999, backupCount = 7)
 
     zcp_logHandler.setFormatter(logging.Formatter('%(asctime)-4s %(levelname)-4s %(message)s'))
     zcp_logger.addHandler(zcp_logHandler)
@@ -75,6 +73,7 @@ def init_zcp(threads):
                                               conf_file.read_option('zabbix_configs', 'zabbix_admin_user'),
                                               conf_file.read_option('zabbix_configs', 'zabbix_admin_pass'),
                                               conf_file.read_option('zabbix_configs', 'zabbix_host'),
+                                              conf_file.read_option('zabbix_configs', 'zabbix_protocol'),
                                               conf_file.read_option('keystone_authtoken', 'keystone_host'),
                                               conf_file.read_option('zcp_configs', 'template_name'),
                                               conf_file.read_option('zcp_configs', 'zabbix_proxy_name'), keystone_auth)
@@ -107,8 +106,7 @@ def init_zcp(threads):
                                        conf_file.read_option('rpc_settings','rpc_nova_host'),
                                        conf_file.read_option('rpc_settings','rpc_nova_user'),
                                        conf_file.read_option('rpc_settings','rpc_nova_pass'),
-                                       zabbix_hdl, ceilometer_hdl
-                                       )
+                                       zabbix_hdl, ceilometer_hdl)
 
     # Creation of the Project Handler class
     # Responsible for detecting the creation of new tenants in OpenStack, translated then to HostGroups in Zabbix
@@ -119,8 +117,7 @@ def init_zcp(threads):
                                                conf_file.read_option('rpc_settings','rpc_keystone_host'),
                                                conf_file.read_option('rpc_settings','rpc_keystone_user'),
                                                conf_file.read_option('rpc_settings','rpc_keystone_pass'),
-                                               zabbix_hdl
-        )
+                                               zabbix_hdl)
 
     #Create and append threads to threads list
     th1 = threading.Thread(target=project_hdl.keystone_listener)
