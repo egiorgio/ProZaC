@@ -1,20 +1,20 @@
 """
 Class for Handling KeystoneEvents in OpenStack's RabbitMQ/QPID
 
-Uses either pika or proton libraries for handling the AMQP protocol, depending whether the message broker is RabbitMQ or QPID, and then implements 
+Uses either pika or proton libraries for handling the AMQP protocol, depending whether the message broker is RabbitMQ or QPID, and then implements
 the necessary callbacks for Keystone events, such as tenant creation
 """
 
 #############       NOTICE         ######################
-# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP), 
-# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt). 
-# For further information about ZCP, check its github : 
-# https://github.com/clmarques/ZabbixCeilometer-Proxy  
+# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
+# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
+# For further information about ZCP, check its github :
+# https://github.com/clmarques/ZabbixCeilometer-Proxy
 ##########################################################
-### ProZaC added functionalities (in this module) ######## 
+### ProZaC added functionalities (in this module) ########
 #
-# - support to logging 
-# - support for an AMQP server distinct from nova 
+# - support to logging
+# - support for an AMQP server distinct from nova
 # - support to QPID
 ### --------------------------- ##########################
 
@@ -46,14 +46,12 @@ class ProjectEvents:
         Method used to listen to keystone events (with rabbitmq amq)
         """
 
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host = self.rpc_host,
-                                                                       credentials = pika.PlainCredentials(
-                                                                       username = self.rpc_user,
-                                                                       password = self.rpc_pass)))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host = self.rpc_host, credentials = pika.PlainCredentials(username = self.rpc_user, password = self.rpc_pass)))
         channel = connection.channel()
         result = channel.queue_declare(exclusive=True)
         queue_name = result.method.queue
         # exchange name should be made available as option, maybe advanced
+        channel.exchange_declare(exchange = 'openstack', type = 'topic')
         channel.exchange_declare(exchange = 'keystone', type = 'topic')
         channel.queue_bind(exchange = 'openstack', queue = queue_name, routing_key = 'notifications.#')
         channel.queue_bind(exchange = 'keystone', queue = queue_name, routing_key = 'keystone.#')
@@ -69,31 +67,31 @@ class ProjectEvents:
         :param properties: refers to the proprieties of the message
         :param body: refers to the message transmitted
         """
-        
+
         payload = json.loads(body)
 
         try:
-          if payload['event_type'] == 'identity.project.created':             
-              tenant_id = payload['payload']['resource_info']
-              tenants = self.zabbix_handler.get_tenants()
-              tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
-              self.zabbix_handler.group_list.append([tenant_name, tenant_id])
-              self.zabbix_handler.create_host_group(tenant_name)
-              
-              self.logger.info("New project (%s) created -> corresponding host group created on zabbix" %(tenant_name))
-          
-          elif payload['event_type'] == 'identity.project.deleted':
-            tenant_id = payload['payload']['resource_info']
-            tenants = self.zabbix_handler.get_tenants()
-            tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
-            self.zabbix_handler.project_delete(tenant_id)
-            
-            self.logger.info("Project %s deleted -> Corresponding host group deleted from zabbix" %(tenant_name))
-        
+            if payload['event_type'] == 'identity.project.created':
+                tenant_id = payload['payload']['resource_info']
+                tenants = self.zabbix_handler.get_tenants()
+                tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
+                self.zabbix_handler.group_list.append([tenant_name, tenant_id])
+                self.zabbix_handler.create_host_group(tenant_name)
+
+                self.logger.info("New project (%s) created -> corresponding host group created on zabbix" %(tenant_name))
+
+            elif payload['event_type'] == 'identity.project.deleted':
+                tenant_id = payload['payload']['resource_info']
+                tenants = self.zabbix_handler.get_tenants()
+                tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
+                self.zabbix_handler.project_delete(tenant_id)
+
+                self.logger.info("Project %s deleted -> Corresponding host group deleted from zabbix" %(tenant_name))
+
         except KeyError, e:
-          self.logger.info("JSON KeyError, skipping message..")
-          pass
-            
+            self.logger.info("JSON KeyError, skipping message..")
+            pass
+
     def keystone_listener(self):
         self.logger.info("Contacting keystone rpc on host %s (rpc type %s) " %(self.rpc_host, self.rpc_type))
 

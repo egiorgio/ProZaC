@@ -19,7 +19,7 @@ class Item(object):
         """
         Constructor. Please refer to Zabbix 2.2 documentation for further informations.
         https://www.zabbix.com/documentation/2.2/manual/api/reference/item/object#host
-        
+
         :item_name: Name of the item.
         :item_key: Item key (it should be unique).
         :item_template_id: ID of the parent template item.
@@ -29,9 +29,9 @@ class Item(object):
         :item_trends: Number of days to keep item's trends data. Trends keep averaged information on hourly basis (less resource-hungry than history).
         :item_units: Value units (any string).
         :item_formula: Custom multiplier (default is 1).
-        :item_delay: Update interval of the item in seconds. 
+        :item_delay: Update interval of the item in seconds.
         """
-        
+
         self.name = item_name
         self.key = item_key
         self.template_id = item_template_id
@@ -42,5 +42,3 @@ class Item(object):
         self.units = item_units
         self.formula = item_formula
         self.delay = item_delay
-        
-

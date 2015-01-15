@@ -1,19 +1,18 @@
 """
 Class for polling Ceilometer
-
 This class provides means to requests for authentication tokens to be used with OpenStack's Ceilometer, Nova and RabbitMQ
 """
 #############       NOTICE         ######################
-# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP), 
-# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt). 
-# For further information about ZCP, check its github : 
-# https://github.com/clmarques/ZabbixCeilometer-Proxy  
+# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
+# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
+# For further information about ZCP, check its github :
+# https://github.com/clmarques/ZabbixCeilometer-Proxy
 ##########################################################
-### ProZaC added functionalities (in this module) ######## 
+### ProZaC added functionalities (in this module) ########
 #
 # - support to token renewal : proxy restart is no longer needed each hour
-# - support to logging 
-# 
+# - support to logging
+#
 ### --------------------------- ##########################
 
 __copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
@@ -21,7 +20,6 @@ __license__ = "Apache 2"
 __contact__ = "emidio.giorgio@ct.infn.it"
 __date__ = "15/11/2014"
 __version__ = "0.9"
-
 
 import struct
 import urllib2
@@ -33,7 +31,6 @@ from threading import Timer
 from exception_handler import *
 
 class CeilometerHandler:
-
     def __init__(self, ceilometer_api_port, polling_interval, template_name, ceilometer_api_host, zabbix_host,
                  zabbix_port, zabbix_proxy_name, keystone_auth, keystone_host, compute_port, keystone_admin_port):
         """
@@ -51,16 +48,16 @@ class CeilometerHandler:
         self.keystone_host = keystone_host
         self.compute_port = compute_port
         self.keystone_admin_port = keystone_admin_port
-        self.admin_tenantid = self.get_admin_tenantid()
-        full_token = self.keystone_auth.getToken()
+        full_token = keystone_auth.getToken()
         self.token = full_token['id']
         self.token_expires = full_token['expires']
+        self.admin_tenantid = self.get_admin_tenantid()
 
         self.logger = keystone_auth.logger
         self.logger.info("Ceilometer handler initialized")
-           
+
     def check_token_lifetime(self, expires_timestamp, threshold = 300):
-        """ 
+        """
         check time (in seconds) left before token expiration
         if time left is below threshold, provides token renewal
         """
@@ -72,7 +69,7 @@ class CeilometerHandler:
             self.token = full_token['id']
             self.token_expires = full_token['expires']
             self.logger.info("ceilometer token has been renewed")
-    
+
     def connect_zabbix(self, payload):
         """
         Method used to send information to Zabbix
@@ -97,23 +94,22 @@ class CeilometerHandler:
         s.close()
 
         response = json.loads(response_raw)
-        
+
         return response
-        
+
     def get_admin_tenantid(self):
         tenantid = ""
         try:
             request = urllib2.urlopen(urllib2.Request("http://" + self.keystone_host + ":" + self.keystone_admin_port + "/v2.0/tenants",
-              headers={"Accept": "application/json", "Content-Type": "application/json",
-              "X-Auth-Token": self.token})).read()
+                                      headers = {"Accept": "application/json", "Content-Type": "application/json","X-Auth-Token": self.token})).read()
         except urllib2.HTTPError, e:
-          solved = handle_HTTPError_openstack(e, self)
+            solved = handle_HTTPError_openstack(e, self)
 
         payload = json.loads(request)
         for item in payload['tenants']:
-          if item['name'] == "admin":
-            tenantid = item['id']
-        
+            if item['name'] == "admin":
+                tenantid = item['id']
+
         return tenantid
 
     def get_hosts_ID(self):
@@ -122,23 +118,21 @@ class CeilometerHandler:
         :return: returns a array of servers and items to monitor by server
         """
         try:
-          request = urllib2.urlopen(urllib2.Request(
-              "http://" + self.keystone_host + ":" + self.compute_port + "/v2/" + self.admin_tenantid + "/servers/detail?all_tenants=1&status=ACTIVE",
-              headers = {"Accept": "application/json", "Content-Type": "application/json",
-              "X-Auth-Token": self.token})).read()
+            request = urllib2.urlopen(urllib2.Request("http://" + self.keystone_host + ":" + self.compute_port + "/v2/" + self.admin_tenantid + "/servers/detail?all_tenants=1&status=ACTIVE",
+                                      headers = {"Accept": "application/json", "Content-Type": "application/json", "X-Auth-Token": self.token})).read()
         except urllib2.HTTPError, e:
-          solved = handle_HTTPError_openstack(e, self)
-          if solved:
-            self.update_values(self.get_hosts_ID())
-            return
+            solved = handle_HTTPError_openstack(e, self)
+            if solved:
+                self.update_values(self.get_hosts_ID())
+                return
 
         payload = json.loads(request)
         hosts_id = []
         for item in payload['servers']:
-            hosts_id.append([item['id'], item['name']]) 
+            hosts_id.append([item['id'], item['name']])
 
         return hosts_id
-    
+
     def query_ceilometer(self, resource_id, item_key, link):
         """
         TODO
@@ -151,47 +145,39 @@ class CeilometerHandler:
         try:
             global contents
             contents = urllib2.urlopen(urllib2.Request(link + str("&limit=1"),
-                                                       headers = {"Accept": "application/json",
-                                                                "Content-Type": "application/json",
-                                                                "X-Auth-Token": self.token})).read()
-
+                                                       headers = {"Accept": "application/json", "Content-Type": "application/json", "X-Auth-Token": self.token})).read()
         except urllib2.HTTPError, e:
-          solved = handle_HTTPError_openstack(e, self)
-          if solved:
-            self.query_ceilometer(resource_id, item_key, link)
-            return
+            solved = handle_HTTPError_openstack(e, self)
+            if solved:
+                self.query_ceilometer(resource_id, item_key, link)
+                return
 
         response = json.loads(contents)
-
         try:
             counter_volume = response[0]['counter_volume']
             self.send_data_zabbix(counter_volume, resource_id, item_key)
-
         except:
             pass
-        
+
     def run(self):
         Timer(self.polling_interval, self.run, ()).start()
         host_list = self.get_hosts_ID()
         self.update_values(host_list)
-    
+
     def send_data_zabbix(self, counter_volume, resource_id, item_key):
         """
         Method used to prepare the body with data from Ceilometer and send it to Zabbix using connect_zabbix method
-
         :param counter_volume: the actual measurement
         :param resource_id:  refers to the resource ID
         :param item_key:    refers to the item key
         """
         tmp = json.dumps(counter_volume)
         data = {"request": "history data", "host": self.zabbix_proxy_name,
-                "data": [{"host": resource_id,
-                          "key": item_key,
-                          "value": tmp}]}
+                "data": [{"host": resource_id, "key": item_key, "value": tmp}]}
 
         payload = self.set_proxy_header(data)
-        self.connect_zabbix(payload)    
-    
+        self.connect_zabbix(payload)
+
     def set_proxy_header(self, data):
         """
         Method used to simplify constructing the protocol to communicate with Zabbix
@@ -204,7 +190,7 @@ class CeilometerHandler:
         data_to_send = HEADER % (data_header, data)
         payload = json.dumps(data)
         return payload
-        
+
     def update_values(self, hosts_id):
         """
         Queries Ceilometer for new samples.
@@ -212,48 +198,40 @@ class CeilometerHandler:
         """
 
         self.check_token_lifetime(self.token_expires)
-        
+
         if not hosts_id:
-          self.logger.info('No active instances. Nothing to monitor.')
-          return
+            self.logger.info('No active instances. Nothing to monitor.')
+            return
 
         for host in hosts_id:
             links = []
             if not host[1] == self.template_name:
-
-                self.logger.info("Checking host %s" %(host[3]))
+                self.logger.info("Checking host %s" %(host[1]))
                 #Get links for instance compute metrics
                 try:
-					request = urllib2.urlopen(urllib2.Request(
-					"http://" + self.ceilometer_api_host + ":" + self.ceilometer_api_port +
-					"/v2/resources?q.field=resource_id&q.value=" + host[0],
-					headers = {"Accept": "application/json", "Content-Type": "application/json",
-							   "X-Auth-Token": self.token})).read()
-				except urllib2.HTTPError, e:
-					solved = handle_HTTPError_openstack(e, self)
-					if solved:
-						self.update_values(hosts_id)
-						return
+                    request = urllib2.urlopen(urllib2.Request("http://" + self.ceilometer_api_host + ":" + self.ceilometer_api_port + "/v2/resources?q.field=resource_id&q.value=" + host[0],
+                                              headers = {"Accept": "application/json", "Content-Type": "application/json", "X-Auth-Token": self.token})).read()
+                except urllib2.HTTPError, e:
+                    solved = handle_HTTPError_openstack(e, self)
+                    if solved:
+                        self.update_values(hosts_id)
+                        return
 
                 # Filter the links to an array
                 for line in json.loads(request):
                     for line2 in line['links']:
-                        if line2['rel'] in ('cpu', 'cpu_util', 'disk.read.bytes', 'disk.read.requests',
-                                            'disk.write.bytes', 'disk.write.requests'):
+                        if line2['rel'] in ('cpu', 'cpu_util', 'disk.read.bytes', 'disk.read.requests', 'disk.write.bytes', 'disk.write.requests'):
                             links.append(line2)
 
                 # Get the links regarding network metrics
                 try:
-					request = urllib2.urlopen(urllib2.Request(
-					"http://" + self.ceilometer_api_host + ":" + self.ceilometer_api_port +
-					"/v2/resources?q.field=metadata.instance_id&q.value=" + host[0],
-					headers = {"Accept": "application/json","Content-Type": "application/json",
-							   "X-Auth-Token": self.token})).read()
-				except urllib2.HTTPError, e:
-					solved = handle_HTTPError_openstack(e, self)
-					if solved:
-						self.update_values(hosts_id)
-						return
+                    request = urllib2.urlopen(urllib2.Request("http://" + self.ceilometer_api_host + ":" + self.ceilometer_api_port + "/v2/resources?q.field=metadata.instance_id&q.value=" + host[0],
+                                                              headers = {"Accept": "application/json","Content-Type": "application/json", "X-Auth-Token": self.token})).read()
+                except urllib2.HTTPError, e:
+                    solved = handle_HTTPError_openstack(e, self)
+                    if solved:
+                        self.update_values(hosts_id)
+                        return
 
                 # Add more links to the array
                 for line in json.loads(request):

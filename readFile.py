@@ -13,20 +13,18 @@ __date__ = "01/09/2014"
 __version__ = "1.0"
 
 import ConfigParser
-
+import os
 
 class ReadConfFile:
 
     config = None
 
-    def __init__(self, file="proxy.conf"):
-
+    def __init__(self, file = os.path.join(os.path.dirname(__file__), 'proxy.conf')):
         """
         Method to read from conf file specific options
-
         :param file:
         """
-        self.conf_file_name=file
+        self.conf_file_name = file
         self.config = ConfigParser.SafeConfigParser()
         self.config.readfp(open(file))
 

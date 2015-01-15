@@ -6,16 +6,16 @@ This proxy periodically checks for changes in Ceilometer's resources reporting t
 OpenStack's Nova and RabbitMQ for reflecting changes in Projects/Tenants and Instances
 """
 #############       NOTICE         ######################
-# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP), 
-# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt). 
-# For further information about ZCP, check its github : 
-# https://github.com/clmarques/ZabbixCeilometer-Proxy  
+# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
+# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
+# For further information about ZCP, check its github :
+# https://github.com/clmarques/ZabbixCeilometer-Proxy
 ##########################################################
-### ProZaC added functionalities (in this module) ######## 
+### ProZaC added functionalities (in this module) ########
 #
 # - support to file logging through python logging library
 # - support to distinct AMQP servers for nova and keystone
-# 
+#
 ### --------------------------- ##########################
 
 __copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
@@ -40,15 +40,14 @@ def init_zcp(threads):
     """
 
     log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING,
-									"ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
+                                                                        "ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
 
     conf_file = readFile.ReadConfFile()
 
     zcp_logger = logging.getLogger('ZCP')
 
-    zcp_logHandler = RotatingFileHandler(conf_file.read_option('zcp_configs','log_file'),
-																				 mode = 'a', maxBytes = 99999, backupCount = 7)
-
+    zcp_logHandler = RotatingFileHandler(conf_file.read_option('zcp_configs','log_file'), mode = 'a', maxBytes = 99999, backupCount = 7)    
+    
     zcp_logHandler.setFormatter(logging.Formatter('%(asctime)-4s %(levelname)-4s %(message)s'))
     zcp_logger.addHandler(zcp_logHandler)
 
@@ -56,7 +55,6 @@ def init_zcp(threads):
     zcp_logger.info("***********************************************************************")
     zcp_logger.info("Prozac is starting")
     zcp_logger.info("Loading configuration options from %s" %(conf_file.conf_file_name))
-
 
     # Creation of the Auth keystone-dedicated authentication class
     # Responsible for managing AAA related requests
@@ -142,7 +140,6 @@ if __name__ == '__main__':
     #wait for all threads to complete
     [th.join() for th in threads]
 
-    # this will never be printed, as daemon is 
+    # this will never be printed, as daemon is
     # killed by shell
     zcp_logger.info("Prozac terminated")
-    
