@@ -196,7 +196,6 @@ class CeilometerHandler:
         Queries Ceilometer for new samples.
         :param hosts_id:
         """
-
         self.check_token_lifetime(self.token_expires)
 
         if not hosts_id:
@@ -220,7 +219,7 @@ class CeilometerHandler:
                 # Filter the links to an array
                 for line in json.loads(request):
                     for line2 in line['links']:
-                        if line2['rel'] in ('cpu', 'cpu_util', 'disk.read.bytes', 'disk.read.requests', 'disk.write.bytes', 'disk.write.requests'):
+                        if line2['rel'] in ('cpu_util', 'memory', 'disk.root.size', 'vcpus'):
                             links.append(line2)
 
                 # Get the links regarding network metrics

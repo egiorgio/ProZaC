@@ -14,12 +14,10 @@ __version__ = "1.0"
 
 class Item(object):
 
-    def __init__(self, item_name, item_key, item_template_id, item_units, item_type = 2, item_value_type = 0, item_history = 90, item_trends = 365,
-                       item_formula = 1, item_delay = 60):
+    def __init__(self, item_name, item_key, item_template_id, item_units, item_type = 2, item_value_type = 0, item_history = 90, item_trends = 365, item_formula = 1, item_delay = 60):
         """
         Constructor. Please refer to Zabbix 2.2 documentation for further informations.
         https://www.zabbix.com/documentation/2.2/manual/api/reference/item/object#host
-
         :item_name: Name of the item.
         :item_key: Item key (it should be unique).
         :item_template_id: ID of the parent template item.
@@ -31,7 +29,6 @@ class Item(object):
         :item_formula: Custom multiplier (default is 1).
         :item_delay: Update interval of the item in seconds.
         """
-
         self.name = item_name
         self.key = item_key
         self.template_id = item_template_id

@@ -4,7 +4,6 @@ Class for Handling KeystoneEvents in OpenStack's RabbitMQ/QPID
 Uses either pika or proton libraries for handling the AMQP protocol, depending whether the message broker is RabbitMQ or QPID, and then implements
 the necessary callbacks for Keystone events, such as tenant creation
 """
-
 #############       NOTICE         ######################
 # ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
 # which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
@@ -24,14 +23,11 @@ __contact__ = "emidio.giorgio@ct.infn.it"
 __date__ = "15/11/2014"
 __version__ = "0.9"
 
-
 import json
 import pika
 
 class ProjectEvents:
-
     def __init__(self, rpc_type, rpc_host, rpc_user, rpc_pass, zabbix_handler):
-
         self.rpc_type = rpc_type
         self.rpc_host = rpc_host
         self.rpc_user = rpc_user
@@ -45,10 +41,9 @@ class ProjectEvents:
         """
         Method used to listen to keystone events (with rabbitmq amq)
         """
-
         connection = pika.BlockingConnection(pika.ConnectionParameters(host = self.rpc_host, credentials = pika.PlainCredentials(username = self.rpc_user, password = self.rpc_pass)))
         channel = connection.channel()
-        result = channel.queue_declare(exclusive=True)
+        result = channel.queue_declare(exclusive = True)
         queue_name = result.method.queue
         # exchange name should be made available as option, maybe advanced
         channel.exchange_declare(exchange = 'openstack', type = 'topic')
@@ -61,15 +56,12 @@ class ProjectEvents:
     def keystone_callback_rabbitmq(self, ch, method, properties, body):
         """
         Method used by method keystone_amq() to filter messages by type of message.
-
         :param ch: refers to the head of the protocol
         :param method: refers to the method used in callback
         :param properties: refers to the proprieties of the message
         :param body: refers to the message transmitted
         """
-
         payload = json.loads(body)
-
         try:
             if payload['event_type'] == 'identity.project.created':
                 tenant_id = payload['payload']['resource_info']

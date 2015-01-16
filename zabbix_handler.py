@@ -2,7 +2,6 @@
 Zabbix Handler
 Provides a class responsible for the communication with Zabbix, including access to several API methods
 """
-
 #############       NOTICE         ######################
 # ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
 # which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
@@ -88,14 +87,10 @@ class ZabbixHandler:
 
         self.check_token_lifetime(self.token_expires)
 
-        auth_request = urllib2.Request(
-            "http://" + self.keystone_host + ":" + self.compute_port + "/v2/" + tenant_id +
-            "/servers/detail?all_tenants=1")
-
+        auth_request = urllib2.Request("http://" + self.keystone_host + ":" + self.compute_port + "/v2/" + tenant_id + "/servers/detail?all_tenants=1")
         auth_request.add_header('Content-Type', 'application/json;charset=utf8')
         auth_request.add_header('Accept', 'application/json')
         auth_request.add_header('X-Auth-Token', self.token)
-
         try:
             auth_response = urllib2.urlopen(auth_request)
             servers = json.loads(auth_response.read())
@@ -265,7 +260,6 @@ class ZabbixHandler:
         :param value_type:
         :return: returns the json message to send to zabbix API
         """
-
         payload = {"jsonrpc": "2.0",
                    "method": "item.create",
                    "params": {
@@ -370,14 +364,10 @@ class ZabbixHandler:
             if tenant_name == 'admin':
                 tenant_id = item[1]
 
-        auth_request = urllib2.Request(
-            "http://" + self.keystone_host + ":" + self.compute_port + "/v2/" + tenant_id +
-            "/servers/" + host_id + "/ips")
-
+        auth_request = urllib2.Request("http://" + self.keystone_host + ":" + self.compute_port + "/v2/" + tenant_id + "/servers/" + host_id + "/ips")
         auth_request.add_header('Content-Type', 'application/json;charset=utf8')
         auth_request.add_header('Accept', 'application/json')
         auth_request.add_header('X-Auth-Token', self.token)
-
         try:
             auth_response = urllib2.urlopen(auth_request)
             result = json.loads(auth_response.read())
@@ -443,9 +433,7 @@ class ZabbixHandler:
         }
 
         response = self.contact_zabbix_server(payload)
-
         proxy_id = None
-
         for item in response['result']:
             if item['host'] == self.zabbix_proxy_name:
                 proxy_id = item['proxyid']
@@ -484,6 +472,7 @@ class ZabbixHandler:
             "auth": self.api_auth,
             "id": 1
         }
+
         response = self.contact_zabbix_server(payload)
 
         if response['result'] is True:
@@ -515,14 +504,11 @@ class ZabbixHandler:
         :return: list of tenants
         """
         tenants = None
-
         self.check_token_lifetime(self.token_expires)
-
         auth_request = urllib2.Request('http://' + self.keystone_host + ':'+self.keystone_admin_port+'/v2.0/tenants')
         auth_request.add_header('Content-Type', 'application/json;charset=utf8')
         auth_request.add_header('Accept', 'application/json')
         auth_request.add_header('X-Auth-Token', self.token)
-
         try:
             auth_response = urllib2.urlopen(auth_request)
             tenants = json.loads(auth_response.read())

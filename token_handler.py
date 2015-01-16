@@ -30,7 +30,6 @@ import logging
 
 class Auth:
     def __init__(self, auth_host, public_port, admin_tenant, admin_user, admin_password):
-
         self.auth_host = auth_host
         self.public_port = public_port
         self.admin_tenant = admin_tenant

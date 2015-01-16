@@ -4,7 +4,6 @@ Class for Handling Nova events in OpenStack's RabbitMQ/QPID
 Uses either pika or proton libraries for handling the AMQP protocol, depending whether the message broker is RabbitMQ or QPID, and then implements
 the necessary callbacks for Nova events, such as instance creation/deletion
 """
-
 #############       NOTICE         ######################
 # ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
 # which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
@@ -25,13 +24,10 @@ __contact__ = "emidio.giorgio@ct.infn.it"
 __date__ = "15/11/2014"
 __version__ = "0.9"
 
-
 import json
 import pika
 
-
 class NovaEvents:
-
     def __init__(self, rpc_type, rpc_host, rpc_user, rpc_pass, zabbix_handler, ceilometer_handler):
         """
         TODO
@@ -61,9 +57,7 @@ class NovaEvents:
         """
         Method used to listen to nova events
         """
-        connection = pika.BlockingConnection(pika.ConnectionParameters(host = self.rpc_host,
-                                                                       credentials = pika.PlainCredentials(username = self.rpc_user,
-                                                                                                                                                                                                                                                                                                                                                                                                                                         password = self.rpc_pass)))
+        connection = pika.BlockingConnection(pika.ConnectionParameters(host = self.rpc_host, credentials = pika.PlainCredentials(username = self.rpc_user, password = self.rpc_pass)))
         channel = connection.channel()
         result = channel.queue_declare(exclusive = True)
         queue_name = result.method.queue
@@ -122,12 +116,10 @@ class NovaEvents:
                 tenant_name=message.content['_context_project_name']
                 instance_id=payload['instance_id']
                 instance_name=payload['hostname']
-                self.zabbix_handler.create_host(instance_name,
-                                                                                                                                                instance_id, tenant_name)
+                self.zabbix_handler.create_host(instance_name, instance_id, tenant_name)
                 self.ceilometer_handler.host_list = self.ceilometer_handler.get_hosts_ID()
 
-                self.logger.info("Instance creation detected : creating host %s (id %s) (tenant %s) on zabbix server"
-                                                                                 %(instance_name,instance_id,tenant_name))
+                self.logger.info("Instance creation detected : creating host %s (id %s) (tenant %s) on zabbix server" %(instance_name,instance_id,tenant_name))
             elif event_type == "compute.instance.delete.end":
                 payload=message.content['payload']
                 instance_id=payload['instance_id']

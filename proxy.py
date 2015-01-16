@@ -36,11 +36,9 @@ from logging.handlers import RotatingFileHandler
 
 def init_zcp(threads):
     """
-        Method used to initialize the Proxy Zabbix - Ceilometer
+    Method used to initialize the Proxy Zabbix - Ceilometer
     """
-
-    log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING,
-                                                                        "ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
+    log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
 
     conf_file = readFile.ReadConfFile()
 
@@ -112,11 +110,11 @@ def init_zcp(threads):
     # project_hdl = project_handler.ProjectEvents(conf_file.read_option('os_rabbitmq', 'rabbit_host'),
     #                                               conf_file.read_option('os_rabbitmq', 'rabbit_user'),
     #                                               conf_file.read_option('os_rabbitmq', 'rabbit_pass'), zabbix_hdl)
-    project_hdl= project_handler.ProjectEvents(conf_file.read_option('rpc_settings','rpc_keystone_type'),
-                                               conf_file.read_option('rpc_settings','rpc_keystone_host'),
-                                               conf_file.read_option('rpc_settings','rpc_keystone_user'),
-                                               conf_file.read_option('rpc_settings','rpc_keystone_pass'),
-                                               zabbix_hdl)
+    project_hdl = project_handler.ProjectEvents(conf_file.read_option('rpc_settings','rpc_keystone_type'),
+                                                conf_file.read_option('rpc_settings','rpc_keystone_host'),
+                                                conf_file.read_option('rpc_settings','rpc_keystone_user'),
+                                                conf_file.read_option('rpc_settings','rpc_keystone_pass'),
+                                                zabbix_hdl)
 
     #Create and append threads to threads list
     th1 = threading.Thread(target=project_hdl.keystone_listener)
@@ -130,7 +128,6 @@ def init_zcp(threads):
 
     #start all the threads
     [th.start() for th in threads]
-
 
 if __name__ == '__main__':
     threads = []

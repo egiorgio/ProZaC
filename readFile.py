@@ -16,9 +16,7 @@ import ConfigParser
 import os
 
 class ReadConfFile:
-
     config = None
-
     def __init__(self, file = os.path.join(os.path.dirname(__file__), 'proxy.conf')):
         """
         Method to read from conf file specific options
