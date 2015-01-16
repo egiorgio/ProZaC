@@ -143,7 +143,7 @@ class ZabbixHandler:
         """
         data = json.dumps(payload)
         try:
-            req = urllib2.Request('http://'+self.zabbix_host+'/zabbix/api_jsonrpc.php', data, {'Content-Type': 'application/json'})
+            req = urllib2.Request(self.zabbix_protocol + '://'+self.zabbix_host+'/zabbix/api_jsonrpc.php', data, {'Content-Type': 'application/json'})
             f = urllib2.urlopen(req)
             response = json.loads(f.read())
             f.close()
