@@ -2,24 +2,9 @@
 Class for polling Ceilometer
 This class provides means to requests for authentication tokens to be used with OpenStack's Ceilometer, Nova and RabbitMQ
 """
-#############       NOTICE         ######################
-# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
-# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
-# For further information about ZCP, check its github :
-# https://github.com/clmarques/ZabbixCeilometer-Proxy
-##########################################################
-### ProZaC added functionalities (in this module) ########
-#
-# - support to token renewal : proxy restart is no longer needed each hour
-# - support to logging
-#
-### --------------------------- ##########################
 
 __copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
 __license__ = "Apache 2"
-__contact__ = "emidio.giorgio@ct.infn.it"
-__date__ = "15/11/2014"
-__version__ = "0.9"
 
 import struct
 import urllib2
@@ -53,7 +38,7 @@ class CeilometerHandler:
         self.token_expires = full_token['expires']
         self.admin_tenantid = self.get_admin_tenantid()
 
-        self.logger = keystone_auth.logger
+        self.logger = logging.getLogger('ZCP')
         self.logger.info("Ceilometer handler initialized")
 
     def check_token_lifetime(self, expires_timestamp, threshold = 300):

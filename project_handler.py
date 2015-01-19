@@ -1,30 +1,15 @@
 """
 Class for Handling KeystoneEvents in OpenStack's RabbitMQ/QPID
-
 Uses either pika or proton libraries for handling the AMQP protocol, depending whether the message broker is RabbitMQ or QPID, and then implements
 the necessary callbacks for Keystone events, such as tenant creation
 """
-#############       NOTICE         ######################
-# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
-# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
-# For further information about ZCP, check its github :
-# https://github.com/clmarques/ZabbixCeilometer-Proxy
-##########################################################
-### ProZaC added functionalities (in this module) ########
-#
-# - support to logging
-# - support for an AMQP server distinct from nova
-# - support to QPID
-### --------------------------- ##########################
 
 __copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
 __license__ = "Apache 2"
-__contact__ = "emidio.giorgio@ct.infn.it"
-__date__ = "15/11/2014"
-__version__ = "0.9"
 
 import json
 import pika
+import logging
 
 class ProjectEvents:
     def __init__(self, rpc_type, rpc_host, rpc_user, rpc_pass, zabbix_handler):
@@ -34,7 +19,7 @@ class ProjectEvents:
         self.rpc_pass = rpc_pass
         self.zabbix_handler = zabbix_handler
 
-        self.logger = zabbix_handler.logger
+        self.logger = logging.getLogger('ZCP')
         self.logger.info('Projects listener started')
 
     def keystone_amq_rabbitmq(self):

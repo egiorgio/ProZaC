@@ -1,19 +1,12 @@
 """
 Class which defines an Item for Zabbix
-
 This class defines an item with his attributes. Objects created with this class are useful when using the 'item.create' of the Zabbix API.
 """
 
-__authors__ = "Daniele Belfiore, Andrea Valentini Albanelli, Matteo Pergolesi"
-__copyright__ = "None"
+__copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
 __license__ = "Apache 2"
-__contact__ = "None"
-__date__ = "16/10/2014"
-
-__version__ = "1.0"
 
 class Item(object):
-
     def __init__(self, item_name, item_key, item_template_id, item_units, item_type = 2, item_value_type = 0, item_history = 90, item_trends = 365, item_formula = 1, item_delay = 60):
         """
         Constructor. Please refer to Zabbix 2.2 documentation for further informations.

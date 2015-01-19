@@ -5,24 +5,15 @@ Proxy for integration of resources between OpenStack's Ceilometer and Zabbix
 This proxy periodically checks for changes in Ceilometer's resources reporting them to Zabbix. It is also integrated
 OpenStack's Nova and RabbitMQ for reflecting changes in Projects/Tenants and Instances
 """
-#############       NOTICE         ######################
-# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
-# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
-# For further information about ZCP, check its github :
-# https://github.com/clmarques/ZabbixCeilometer-Proxy
-##########################################################
-### ProZaC added functionalities (in this module) ########
-#
-# - support to file logging through python logging library
-# - support to distinct AMQP servers for nova and keystone
-#
-### --------------------------- ##########################
+#####################################   NOTICE   #####################################
+# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),                              #
+# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt). #
+# For further information about ZCP, check its github:                               #
+# https://github.com/clmarques/ZabbixCeilometer-Proxy                                #
+######################################################################################
 
 __copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
 __license__ = "Apache 2"
-__contact__ = "emidio.giorgio@ct.infn.it"
-__date__ = "15/11/2014"
-__version__ = "0.9"
 
 import threading
 import project_handler
@@ -33,27 +24,29 @@ import zabbix_handler
 import ceilometer_handler
 import logging
 from logging.handlers import RotatingFileHandler
+conf_file = readFile.ReadConfFile()
 
-def init_zcp(threads):
+def init_logger():
     """
-    Method used to initialize the Proxy Zabbix - Ceilometer
+    Method used to initialize the logging object
     """
-    log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
-
-    conf_file = readFile.ReadConfFile()
-
     zcp_logger = logging.getLogger('ZCP')
 
-    zcp_logHandler = RotatingFileHandler(conf_file.read_option('zcp_configs','log_file'), mode = 'a', maxBytes = 99999, backupCount = 7)    
-    
+    log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
+
+    zcp_logHandler = RotatingFileHandler(conf_file.read_option('zcp_configs', 'log_file'), mode = 'a', maxBytes = 99999, backupCount = 7)       
     zcp_logHandler.setFormatter(logging.Formatter('%(asctime)-4s %(levelname)-4s %(message)s'))
     zcp_logger.addHandler(zcp_logHandler)
 
-    zcp_logger.setLevel(log_levels[conf_file.read_option('zcp_configs','log_level')])
+    zcp_logger.setLevel(log_levels[conf_file.read_option('zcp_configs', 'log_level')])
+
     zcp_logger.info("***********************************************************************")
     zcp_logger.info("Prozac is starting")
     zcp_logger.info("Loading configuration options from %s" %(conf_file.conf_file_name))
 
+def init_zcp(threads):
+    zcp_logger = logging.getLogger('ZCP')
+ 
     # Creation of the Auth keystone-dedicated authentication class
     # Responsible for managing AAA related requests
     keystone_auth = token_handler.Auth(conf_file.read_option('keystone_authtoken', 'keystone_host'),
@@ -130,6 +123,8 @@ def init_zcp(threads):
     [th.start() for th in threads]
 
 if __name__ == '__main__':
+    init_logger()
+
     threads = []
 
     init_zcp(threads)
@@ -139,4 +134,5 @@ if __name__ == '__main__':
 
     # this will never be printed, as daemon is
     # killed by shell
-    zcp_logger.info("Prozac terminated")
+    zcp_logger.info("Prozac terminated") 
+

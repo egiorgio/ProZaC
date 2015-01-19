@@ -2,30 +2,16 @@
 Zabbix Handler
 Provides a class responsible for the communication with Zabbix, including access to several API methods
 """
-#############       NOTICE         ######################
-# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
-# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
-# For further information about ZCP, check its github :
-# https://github.com/clmarques/ZabbixCeilometer-Proxy
-##########################################################
-### ProZaC added functionalities (in this module) ########
-#
-# - support to token renewal : proxy restart is no longer needed each hour
-# - refinement of item data types (units, multiplier, representation)
-#
-### --------------------------- ##########################
 
 __copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
 __license__ = "Apache 2"
-__contact__ = "emidio.giorgio@ct.infn.it"
-__date__ = "15/11/2014"
-__version__ = "0.9"
 
 import urllib2
 import json
 import time
 from exception_handler import *
 from item import Item
+import logging
 
 class ZabbixHandler:
     def __init__(self, keystone_admin_port, compute_port, network_name, admin_user,
@@ -47,7 +33,7 @@ class ZabbixHandler:
         self.token = full_token['id']
         self.token_expires = full_token['expires']
 
-        self.logger = keystone_auth.logger
+        self.logger = logging.getLogger('ZCP')
         self.logger.info("Zabbix handler initialized")
 
     def check_host_groups(self):

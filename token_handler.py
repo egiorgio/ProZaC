@@ -1,27 +1,11 @@
 #!/usr/bin/python
 """
 Class for requesting authentication tokens to Keystone
-
 This class provides means to requests for authentication tokens to be used with OpenStack's Ceilometer, Nova and RabbitMQ
 """
-#############       NOTICE         ######################
-# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP),
-# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt).
-# For further information about ZCP, check its github :
-# https://github.com/clmarques/ZabbixCeilometer-Proxy
-##########################################################
-### ProZaC added functionalities (in this module) ########
-#
-# - support of token renewal : proxy restart is no longer needed each hour
-# - support to logging
-#
-### --------------------------- ##########################
 
 __copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
 __license__ = "Apache 2"
-__contact__ = "emidio.giorgio@ct.infn.it"
-__date__ = "15/11/2014"
-__version__ = "0.9"
 
 import urllib2
 import json
@@ -35,7 +19,8 @@ class Auth:
         self.admin_tenant = admin_tenant
         self.admin_user = admin_user
         self.admin_password = admin_password
-        self.logger=logging.getLogger('ZCP')
+        
+        self.logger = logging.getLogger('ZCP')
         self.logger.info("Keystone handler initialized")
 
     def getToken(self):
