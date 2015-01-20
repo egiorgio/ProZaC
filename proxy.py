@@ -23,7 +23,7 @@ import token_handler
 import zabbix_handler
 import ceilometer_handler
 import logging
-from logging.handlers import RotatingFileHandler
+from logging.handlers import TimedRotatingFileHandler
 conf_file = readFile.ReadConfFile()
 
 def init_logger():
@@ -34,7 +34,7 @@ def init_logger():
 
     log_levels = {"DEBUG": logging.DEBUG, "INFO": logging.INFO, "WARNING": logging.WARNING, "ERROR": logging.ERROR, "CRITICAL": logging.CRITICAL}
 
-    zcp_logHandler = RotatingFileHandler(conf_file.read_option('zcp_configs', 'log_file'), mode = 'a', maxBytes = 99999, backupCount = 7)       
+    zcp_logHandler = TimedRotatingFileHandler(conf_file.read_option('zcp_configs', 'log_file'), when= 'D', interval = 7, backupCount = 4)
     zcp_logHandler.setFormatter(logging.Formatter('%(asctime)-4s %(levelname)-4s %(message)s'))
     zcp_logger.addHandler(zcp_logHandler)
 
