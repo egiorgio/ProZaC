@@ -1,19 +1,7 @@
-#!/bin/sh
-#
-# ProZaC : Proxy Zabbix Ceilometer 
-#
-# chkconfig:   - 98 02
-# description:  Proxy for integration of resources between OpenStack's Ceilometer and Zabbix. 
-# This proxy periodically checks for changes in Ceilometer's resources reporting them to Zabbix. 
-# It is also integrated OpenStack's Nova and RabbitMQ/QPID for reflecting changes in Projects/Tenants and Instances
-# ProZaC is a fork of ZabbixCeilometer-Proxy (aka ZCP), 
-# which is Copyright of OneSource Consultoria Informatica (http://www.onesource.pt). 
-# For further information about ZCP, check its github : 
-# https://github.com/clmarques/ZabbixCeilometer-Proxy             
-#            
-#      
+#!/bin/sh    
 
 ### BEGIN INIT INFO
+#
 # Provides:
 # Required-Start: $remote_fs $network $syslog
 # Required-Stop: $remote_fs $syslog
