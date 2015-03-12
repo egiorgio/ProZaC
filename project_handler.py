@@ -1,7 +1,9 @@
 """
 Class for Handling KeystoneEvents in OpenStack's RabbitMQ/QPID
+
 Uses either pika or proton libraries for handling the AMQP protocol, depending whether the message broker is RabbitMQ or QPID, and then implements
 the necessary callbacks for Keystone events, such as tenant creation
+
 """
 
 __copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
@@ -54,7 +56,6 @@ class ProjectEvents:
                 tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
                 self.zabbix_handler.group_list.append([tenant_name, tenant_id])
                 self.zabbix_handler.create_host_group(tenant_name)
-
                 self.logger.info("New project (%s) created -> corresponding host group created on zabbix" %(tenant_name))
 
             elif payload['event_type'] == 'identity.project.deleted':
@@ -62,7 +63,6 @@ class ProjectEvents:
                 tenants = self.zabbix_handler.get_tenants()
                 tenant_name = self.zabbix_handler.get_tenant_name(tenants, tenant_id)
                 self.zabbix_handler.project_delete(tenant_id)
-
                 self.logger.info("Project %s deleted -> Corresponding host group deleted from zabbix" %(tenant_name))
 
         except KeyError, e:
@@ -78,3 +78,4 @@ class ProjectEvents:
             self.nova_amq_qpid()
 
     ## SUPPORT FOR QPID TO BE ADDED
+

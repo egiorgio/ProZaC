@@ -15,6 +15,7 @@ OpenStack's Nova and RabbitMQ for reflecting changes in Projects/Tenants and Ins
 __copyright__ = "Istituto Nazionale di Fisica Nucleare (INFN)"
 __license__ = "Apache 2"
 
+import sys, getopt
 import threading
 import project_handler
 import nova_handler
@@ -123,11 +124,12 @@ def init_zcp(threads):
     [th.start() for th in threads]
 
 if __name__ == '__main__':
+
     init_logger()
 
     threads = []
 
-    init_zcp(threads)
+    init_zcp(threads,configuration_file)
 
     #wait for all threads to complete
     [th.join() for th in threads]

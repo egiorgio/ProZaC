@@ -485,6 +485,7 @@ class ZabbixHandler:
         return template_id
 
     def get_tenants(self):
+        # might be well renamed or relocated to another module EG
         """
         Method used to get a list of tenants from keystone
         :return: list of tenants
