@@ -14,13 +14,12 @@ from item import Item
 import logging
 
 class ZabbixHandler:
-    def __init__(self, keystone_admin_port, compute_port, network_name, admin_user,
+    def __init__(self, keystone_admin_port, compute_port, admin_user,
                  zabbix_admin_pass, zabbix_host, zabbix_protocol, keystone_host,
                  template_name, zabbix_proxy_name, keystone_auth):
 
         self.keystone_admin_port = keystone_admin_port
         self.compute_port = compute_port
-        self.network_name = network_name
         self.zabbix_admin_user = admin_user
         self.zabbix_admin_pass = zabbix_admin_pass
         self.zabbix_host = zabbix_host
@@ -341,9 +340,8 @@ class ZabbixHandler:
 
     def find_host_ip(self, host_id):
         """
-        Method used to get the first ip address of an instance. Variable 'network_name' can be configured in 'proxy.conf'.
+        Method used to get the first ip address of an instance.
         """
-        servers = None
         tenant_id = None
         for item in self.group_list:
             tenant_name = item[0]
@@ -357,6 +355,7 @@ class ZabbixHandler:
         try:
             auth_response = urllib2.urlopen(auth_request)
             result = json.loads(auth_response.read())
+            subnet_name=result['addresses'].keys()[0]
 
         except urllib2.HTTPError, e:
             solved = handle_HTTPError_openstack(e, self)
@@ -364,7 +363,7 @@ class ZabbixHandler:
                 self.find_host_ip(host_id)
                 return
 
-        return result['addresses'][self.network_name][0]['addr']
+        return result['addresses'][subnet_name][0]['addr']
 
     def first_run(self):
         self.api_auth = self.get_zabbix_auth()

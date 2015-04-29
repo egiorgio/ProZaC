@@ -40,6 +40,7 @@ class Auth:
 
         token_id = response_data['access']['token']['id']
         expiration_time = response_data['access']['token']['expires']
+        self.logger.debug("Token expiration time:"+expiration_time)
         expiration_timestamp = time.mktime(time.strptime(expiration_time,"%Y-%m-%dT%H:%M:%SZ"))
 
         token = {'id': token_id, 'expires': expiration_timestamp}

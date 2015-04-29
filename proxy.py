@@ -45,7 +45,7 @@ def init_logger():
     zcp_logger.info("Prozac is starting")
     zcp_logger.info("Loading configuration options from %s" %(conf_file.conf_file_name))
 
-def init_zcp(threads):
+def init_zcp(threads, conf_file):
     zcp_logger = logging.getLogger('ZCP')
  
     # Creation of the Auth keystone-dedicated authentication class
@@ -60,7 +60,6 @@ def init_zcp(threads):
     # Responsible for the communication with Zabbix
     zabbix_hdl = zabbix_handler.ZabbixHandler(conf_file.read_option('keystone_authtoken', 'keystone_admin_port'),
                                               conf_file.read_option('keystone_authtoken', 'nova_compute_listen_port'),
-                                              conf_file.read_option('keystone_authtoken', 'network_name'),
                                               conf_file.read_option('zabbix_configs', 'zabbix_admin_user'),
                                               conf_file.read_option('zabbix_configs', 'zabbix_admin_pass'),
                                               conf_file.read_option('zabbix_configs', 'zabbix_host'),
@@ -129,7 +128,7 @@ if __name__ == '__main__':
 
     threads = []
 
-    init_zcp(threads,configuration_file)
+    init_zcp(threads,conf_file)
 
     #wait for all threads to complete
     [th.join() for th in threads]
