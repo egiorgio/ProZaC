@@ -11,30 +11,25 @@ import logging
 logger = logging.getLogger('ZCP')
 
 def handle_HTTPError_openstack(exception, caller):
-    solved = False
+    message = ""
     if exception.code == 401:
-        logger.warning("401. Maybe keystone token expired. Trying to ask for a new one...")
-        newToken = caller.keystone_auth.getToken()
-        if newToken is not None:
-            logger.warning("Got a new token from keystone.")
-            caller.token = newToken
-            solved = True
+      message = "Unauthorized by Openstack."
     elif exception.code == 404:
-        logger.warning("Openstack resource not found.")
+      message = "Openstack resource not found."
     elif exception.code == 503:
-        logger.warning("Openstack service unavailable")
+      message = "Openstack service unavailable."
     else:
-        logger.warning('Unknown error: %d' % exception.code)
-    return solved
+      message = "Unknown error."
+    logger.warning("Error code %d: %s" % (code, message))
 
 def handle_HTTPError_zabbix(exception, caller):
-    solved = False
+    message = ""
     if exception.code == 401:
-        logger.warning("401. Maybe Zabbix token expired. Trying to ask for a new one...")
+      message = "Unauthorized by Zabbix."
     elif exception.code == 404:
-        logger.warning("Zabbix resource not found.")
+      message = "Zabbix resource not found."
     elif exception.code == 503:
-        logger.warning("Zabbix service unavailable")
+      message = "Zabbix service unavailable."
     else:
-        logger.warning('Unknown error: %d' % exception.code)
-    return solved
+      message = "Unknown error."
+    logger.warning("Error code %d: %s" % (code, message)) 

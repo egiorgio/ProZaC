@@ -88,7 +88,7 @@ class CeilometerHandler:
             request = urllib2.urlopen(urllib2.Request("http://" + self.keystone_host + ":" + self.keystone_admin_port + "/v2.0/tenants",
                                       headers = {"Accept": "application/json", "Content-Type": "application/json","X-Auth-Token": self.token})).read()
         except urllib2.HTTPError, e:
-            solved = handle_HTTPError_openstack(e, self)
+            handle_HTTPError_openstack(e, self)
 
         payload = json.loads(request)
         for item in payload['tenants']:
@@ -106,10 +106,7 @@ class CeilometerHandler:
             request = urllib2.urlopen(urllib2.Request("http://" + self.keystone_host + ":" + self.compute_port + "/v2/" + self.admin_tenantid + "/servers/detail?all_tenants=1&status=ACTIVE",
                                       headers = {"Accept": "application/json", "Content-Type": "application/json", "X-Auth-Token": self.token})).read()
         except urllib2.HTTPError, e:
-            solved = handle_HTTPError_openstack(e, self)
-            if solved:
-                self.update_values(self.get_hosts_ID())
-                return
+            handle_HTTPError_openstack(e, self)
 
         payload = json.loads(request)
         hosts_id = []
@@ -132,10 +129,7 @@ class CeilometerHandler:
             contents = urllib2.urlopen(urllib2.Request(link + str("&limit=1"),
                                                        headers = {"Accept": "application/json", "Content-Type": "application/json", "X-Auth-Token": self.token})).read()
         except urllib2.HTTPError, e:
-            solved = handle_HTTPError_openstack(e, self)
-            if solved:
-                self.query_ceilometer(resource_id, item_key, link)
-                return
+            handle_HTTPError_openstack(e, self)
 
         response = json.loads(contents)
         try:
@@ -196,10 +190,7 @@ class CeilometerHandler:
                     request = urllib2.urlopen(urllib2.Request("http://" + self.ceilometer_api_host + ":" + self.ceilometer_api_port + "/v2/resources?q.field=resource_id&q.value=" + host[0],
                                               headers = {"Accept": "application/json", "Content-Type": "application/json", "X-Auth-Token": self.token})).read()
                 except urllib2.HTTPError, e:
-                    solved = handle_HTTPError_openstack(e, self)
-                    if solved:
-                        self.update_values(hosts_id)
-                        return
+                    handle_HTTPError_openstack(e, self)
 
                 # Filter the links to an array
                 for line in json.loads(request):
@@ -212,10 +203,7 @@ class CeilometerHandler:
                     request = urllib2.urlopen(urllib2.Request("http://" + self.ceilometer_api_host + ":" + self.ceilometer_api_port + "/v2/resources?q.field=metadata.instance_id&q.value=" + host[0],
                                                               headers = {"Accept": "application/json","Content-Type": "application/json", "X-Auth-Token": self.token})).read()
                 except urllib2.HTTPError, e:
-                    solved = handle_HTTPError_openstack(e, self)
-                    if solved:
-                        self.update_values(hosts_id)
-                        return
+                    handle_HTTPError_openstack(e, self)
 
                 # Add more links to the array
                 for line in json.loads(request):

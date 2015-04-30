@@ -81,10 +81,7 @@ class ZabbixHandler:
             servers = json.loads(auth_response.read())
 
         except urllib2.HTTPError, e:
-            solved = handle_HTTPError_openstack(e, self)
-            if solved:
-                self.check_instances()
-                return
+            handle_HTTPError_openstack(e, self)
 
         for item in servers['servers']:
             payload = {
@@ -133,10 +130,7 @@ class ZabbixHandler:
             response = json.loads(f.read())
             f.close()
         except urllib2.HTTPError, e:
-            solved = handle_HTTPError_zabbix(e, self)
-            if solved:
-                self.contact_zabbix_server(payload)
-                return
+            handle_HTTPError_zabbix(e, self)
 
         return response
 
@@ -358,10 +352,7 @@ class ZabbixHandler:
             subnet_name=result['addresses'].keys()[0]
 
         except urllib2.HTTPError, e:
-            solved = handle_HTTPError_openstack(e, self)
-            if solved:
-                self.find_host_ip(host_id)
-                return
+            handle_HTTPError_openstack(e, self)
 
         return result['addresses'][subnet_name][0]['addr']
 
@@ -499,10 +490,7 @@ class ZabbixHandler:
             auth_response = urllib2.urlopen(auth_request)
             tenants = json.loads(auth_response.read())
         except urllib2.HTTPError, e:
-            solved = handle_HTTPError_openstack(e, self)
-            if solved:
-                self.get_tenants()
-                return
+            handle_HTTPError_openstack(e, self)
 
         return tenants
 
