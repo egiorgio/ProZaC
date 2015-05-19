@@ -9,7 +9,7 @@ __license__ = "Apache 2"
 
 import urllib2
 import json
-import time
+import time, calendar
 import logging
 
 class Auth:
@@ -40,8 +40,9 @@ class Auth:
 
         token_id = response_data['access']['token']['id']
         expiration_time = response_data['access']['token']['expires']
-        self.logger.debug("Token expiration time:"+expiration_time)
-        expiration_timestamp = time.mktime(time.strptime(expiration_time,"%Y-%m-%dT%H:%M:%SZ"))
+        self.logger.debug("Token expiration time:" + expiration_time)
+        expiration_timestamp = calendar.timegm(time.strptime(expiration_time,"%Y-%m-%dT%H:%M:%SZ"))
+        self.logger.debug("Expiration timestamp: " + str(expiration_timestamp))
 
         token = {'id': token_id, 'expires': expiration_timestamp}
 
