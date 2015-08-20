@@ -109,9 +109,7 @@ class ZabbixHandler:
         if time left is below threshold, provides token renewal
         """
         now_timestamp_utc = time.time()
-        #self.logger.debug("UTC now timestamp: " + str(now_timestamp_utc))
         timeleft = expires_timestamp - now_timestamp_utc
-        #self.logger.debug("Time left for expiration: " + str(timeleft))
 
         if timeleft < threshold: # default, less than five minutes
             full_token = self.keystone_auth.getToken()
