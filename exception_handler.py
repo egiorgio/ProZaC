@@ -11,7 +11,7 @@ import logging
 logger = logging.getLogger('ZCP')
 
 def handle_HTTPError_openstack(exception, caller):
-    logger.warning("Zabbix Error %d: %s" % (exception.code, exception.reason))
+    logger.warning("Openstack Error %d: %s" % (exception.code, exception.reason))
 
 def handle_HTTPError_zabbix(exception, caller):
     logger.warning("Zabbix Error %d: %s" % (exception.code, exception.reason))
