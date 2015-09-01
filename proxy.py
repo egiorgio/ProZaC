@@ -29,8 +29,7 @@ import readFile
 import token_handler
 import zabbix_handler
 import ceilometer_handler
-
-conf_file = readFile.ReadConfFile()
+import configuration
 
 def init_logger():
     """
@@ -60,47 +59,18 @@ def init_logger():
             (conf_file.conf_file_name)
             )
 
-def init_zcp(threads, conf_file):
+def init_zcp(threads, configuration):
     zcp_logger = logging.getLogger('ZCP')
     # Creation of the Auth keystone-dedicated authentication class
     # Responsible for managing AAA related requests
-    keystone_auth = token_handler.Auth(
-            conf_file.read_option('keystone_authtoken', 'keystone_host'),
-            conf_file.read_option('keystone_authtoken', 'keystone_public_port'),
-            conf_file.read_option('keystone_authtoken', 'admin_tenant'),
-            conf_file.read_option('keystone_authtoken', 'admin_user'),
-            conf_file.read_option('keystone_authtoken', 'admin_password')
-            )
+    keystone_auth = token_handler.Auth(configuration)
     # Creation of the Zabbix Handler class
     # Responsible for the communication with Zabbix
-    zabbix_hdl = zabbix_handler.ZabbixHandler(
-            conf_file.read_option('keystone_authtoken', 'keystone_admin_port'),
-            conf_file.read_option('keystone_authtoken', 'nova_compute_listen_port'),
-            conf_file.read_option('zabbix_configs', 'zabbix_admin_user'),
-            conf_file.read_option('zabbix_configs', 'zabbix_admin_pass'),
-            conf_file.read_option('zabbix_configs', 'zabbix_host'),
-            conf_file.read_option('zabbix_configs', 'zabbix_protocol'),
-            conf_file.read_option('keystone_authtoken', 'keystone_host'),
-            conf_file.read_option('zcp_configs', 'template_name'),
-            conf_file.read_option('zcp_configs', 'zabbix_proxy_name'),
-            keystone_auth
-            )
+    zabbix_hdl = zabbix_handler.ZabbixHandler(configuration, keystone_auth)
     # Creation of the Ceilometer Handler class
     # Responsible for the communication with OpenStack's Ceilometer,
     # polling for changes every N seconds
-    ceilometer_hdl = ceilometer_handler.CeilometerHandler(
-            conf_file.read_option('ceilometer_configs', 'ceilometer_api_port'),
-            conf_file.read_option('zcp_configs', 'polling_interval'),
-            conf_file.read_option('zcp_configs', 'template_name'),
-            conf_file.read_option('ceilometer_configs', 'ceilometer_api_host'),
-            conf_file.read_option('zabbix_configs', 'zabbix_host'),
-            conf_file.read_option('zabbix_configs', 'zabbix_port'),
-            conf_file.read_option('zcp_configs', 'zabbix_proxy_name'),
-            keystone_auth,
-            conf_file.read_option('keystone_authtoken', 'keystone_host'),
-            conf_file.read_option('keystone_authtoken', 'nova_compute_listen_port'),
-            conf_file.read_option('keystone_authtoken', 'keystone_admin_port')
-            )
+    ceilometer_hdl = ceilometer_handler.CeilometerHandler(configuration, keystone_auth)
     zcp_logger.info('Listeners have been initialized, ready for Zabbix first run')
     zabbix_hdl.first_run()
     # Creation of the Nova Handler class
@@ -111,14 +81,7 @@ def init_zcp(threads, conf_file):
     #       conf_file.read_option('os_rabbitmq', 'rabbit_user'),
     #       conf_file.read_option('os_rabbitmq', 'rabbit_pass'), zabbix_hdl,
     #       ceilometer_hdl)
-    nova_hdl = nova_handler.NovaEvents(
-            conf_file.read_option('rpc_settings','rpc_nova_type'),
-            conf_file.read_option('rpc_settings','rpc_nova_host'),
-            conf_file.read_option('rpc_settings','rpc_nova_user'),
-            conf_file.read_option('rpc_settings','rpc_nova_pass'),
-            zabbix_hdl,
-            ceilometer_hdl
-            )
+    nova_hdl = nova_handler.NovaEvents(configuration, zabbix_hdl, ceilometer_hdl)
     # Creation of the Project Handler class
     # Responsible for detecting the creation of new tenants in OpenStack,
     # translated then to HostGroups in Zabbix
@@ -126,13 +89,8 @@ def init_zcp(threads, conf_file):
     #       conf_file.read_option('os_rabbitmq', 'rabbit_host'),
     #       conf_file.read_option('os_rabbitmq', 'rabbit_user'),
     #       conf_file.read_option('os_rabbitmq', 'rabbit_pass'), zabbix_hdl)
-    project_hdl = project_handler.ProjectEvents(
-            conf_file.read_option('rpc_settings','rpc_keystone_type'),
-            conf_file.read_option('rpc_settings','rpc_keystone_host'),
-            conf_file.read_option('rpc_settings','rpc_keystone_user'),
-            conf_file.read_option('rpc_settings','rpc_keystone_pass'),
-            zabbix_hdl
-            )
+    project_hdl = project_handler.ProjectEvents(configuration, zabbix_hdl)
+
     th1 = threading.Thread(target=project_hdl.keystone_listener)
     threads.append(th1)
     th2 = threading.Thread(target=nova_hdl.nova_listener)
@@ -144,7 +102,8 @@ def init_zcp(threads, conf_file):
 if __name__ == '__main__':
     init_logger()
     threads = []
-    init_zcp(threads,conf_file)
+    configuration = configuration.Configuration()
+    init_zcp(threads, configuration)
     # wait for all threads to complete
     [th.join() for th in threads]
     # this will never be printed, as daemon is killed by shell
